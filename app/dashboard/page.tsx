@@ -9,8 +9,11 @@ import { Button } from '@/components/ui/button';
 import { Plus, FileText, DollarSign, Clock, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getInvoices } from '@/app/actions/invoices';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function DashboardPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -31,6 +34,20 @@ export default function DashboardPage() {
       setIsLoading(false);
     }
   };
+
+  // Open create dialog if ?new=invoice is present (e.g., from command palette)
+  useEffect(() => {
+    const shouldOpen = searchParams.get('new') === 'invoice';
+    if (shouldOpen) {
+      setSelectedInvoice(null);
+      setDialogOpen(true);
+      // Remove the query param to avoid reopening on back/forward
+      const params = new URLSearchParams(Array.from(searchParams.entries()));
+      params.delete('new');
+      const next = params.toString();
+      router.replace(next ? `/dashboard?${next}` : '/dashboard');
+    }
+  }, [searchParams, router]);
 
   const handleEdit = (invoice: Invoice) => {
     setSelectedInvoice(invoice);

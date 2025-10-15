@@ -50,7 +50,7 @@ export function CommandPalette({
 
   const router = useRouter();
   const { theme, setTheme } = useTheme();
-  const { signOut } = useClerk();
+  const { signOut, openUserProfile } = useClerk();
 
   // Initialize Fuse.js for fuzzy search
   const fuse = useRef(new Fuse(commandRegistry, {
@@ -65,16 +65,33 @@ export function CommandPalette({
       // Handle commands that need props or special logic
       switch (command.id) {
         case 'new-invoice':
-          if (onCreateInvoice) onCreateInvoice();
+          if (onCreateInvoice) {
+            onCreateInvoice();
+          } else {
+            // Fallback: route hint to create flow on dashboard
+            router.push('/dashboard?new=invoice');
+          }
           break;
         case 'export-invoices':
-          if (onExportInvoices) onExportInvoices();
+          if (onExportInvoices) {
+            onExportInvoices();
+          } else {
+            // Fallback: basic CSV export placeholder
+            alert('Export coming soon. Hook up onExportInvoices to enable CSV download.');
+          }
           break;
         case 'goto-dashboard':
           router.push('/dashboard');
           break;
         case 'goto-billing':
           router.push('/billing');
+          break;
+        case 'view-profile':
+          if (openUserProfile) {
+            openUserProfile();
+          } else {
+            router.push('/');
+          }
           break;
         case 'toggle-theme':
           setTheme(theme === 'dark' ? 'light' : 'dark');
@@ -99,7 +116,7 @@ export function CommandPalette({
       }
       setSearchQuery('');
     }
-  }, [onCreateInvoice, onExportInvoices, router, theme, setTheme, signOut]);
+  }, [onCreateInvoice, onExportInvoices, router, theme, setTheme, signOut, openUserProfile]);
 
   // Filter commands based on search query
   useEffect(() => {
