@@ -1,42 +1,33 @@
-export type InvoiceStatus = 'paid' | 'pending' | 'overdue' | 'cancelled';
-export type PaymentMethod = 'credit_card' | 'bank_transfer' | 'paypal' | 'cash' | 'other';
+/**
+ * Invoice Types
+ *
+ * These types are now derived from Zod schemas for runtime validation.
+ * This file now just re-exports types from the schema file.
+ *
+ * Why? By defining validation rules once in Zod schemas, we get:
+ * 1. Runtime validation (catch errors from user input)
+ * 2. Compile-time type safety (TypeScript types)
+ * 3. Single source of truth (no duplicate definitions)
+ */
 
-export interface InvoiceItem {
-  name: string;
-  quantity: number;
-  price: number;
-}
+export type {
+  InvoiceStatus,
+  PaymentMethod,
+  InvoiceItem,
+  Invoice,
+  CreateInvoiceInput,
+  UpdateInvoiceInput,
+} from '@/lib/schemas/invoice.schema';
 
-export interface Invoice {
-  id: string;
-  invoice_number: string;
-  customer_name: string;
-  customer_email?: string;
-  amount: number;
-  status: InvoiceStatus;
-  due_date: string;
-  issue_date: string;
-  items: InvoiceItem[];
-  payment_method?: PaymentMethod;
-  notes?: string;
-  org_id: string;
-  user_id: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface CreateInvoiceInput {
-  customer_name: string;
-  customer_email?: string;
-  amount: number;
-  status: InvoiceStatus;
-  due_date: string;
-  issue_date: string;
-  items: InvoiceItem[];
-  payment_method?: PaymentMethod;
-  notes?: string;
-}
-
-export interface UpdateInvoiceInput extends Partial<CreateInvoiceInput> {
-  id: string;
-}
+// Re-export schemas for convenience
+export {
+  InvoiceStatusEnum,
+  PaymentMethodEnum,
+  InvoiceItemSchema,
+  InvoiceSchema,
+  CreateInvoiceSchema,
+  UpdateInvoiceSchema,
+  validateCreateInvoice,
+  validateUpdateInvoice,
+  formatZodErrors,
+} from '@/lib/schemas/invoice.schema';

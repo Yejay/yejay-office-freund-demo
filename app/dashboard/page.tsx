@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { Invoice } from '@/lib/types/invoice';
-import { InvoiceTable } from '@/components/invoices/invoice-table';
+// Using AG Grid table instead of the basic table component
+import { InvoiceTableAgGrid } from '@/components/invoices/invoice-table-ag-grid';
 import { InvoiceDialog } from '@/components/invoices/invoice-dialog';
 import { Button } from '@/components/ui/button';
 import { Plus, FileText, DollarSign, Clock, AlertCircle } from 'lucide-react';
@@ -156,7 +157,7 @@ export default function DashboardPage() {
           <div className="text-muted-foreground">Loading invoices...</div>
         </div>
       ) : (
-        <InvoiceTable invoices={invoices} onEdit={handleEdit} />
+        <InvoiceTableAgGrid invoices={invoices} onEdit={handleEdit} />
       )}
 
       {/* Invoice Dialog */}

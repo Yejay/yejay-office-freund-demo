@@ -14,6 +14,10 @@ A comprehensive technical guide explaining how this application works, designed 
 6. [Complete Data Flow Examples](#complete-data-flow-examples)
 7. [Key Files Explained](#key-files-explained)
 8. [Common Patterns](#common-patterns)
+9. [How Zod Validation Works](#how-zod-validation-works)
+10. [How AG Grid Works](#how-ag-grid-works)
+11. [How Clerk Billing Works](#how-clerk-billing-works)
+12. [How the Command Palette Works](#how-the-command-palette-works)
 
 ---
 
@@ -1063,12 +1067,707 @@ export async function doSomething(input: Input) {
 
 ---
 
+---
+
+## How Zod Validation Works
+
+### What is Zod?
+
+Zod is a TypeScript-first schema validation library. Unlike TypeScript types which only exist at compile time, Zod validates data at **runtime** - catching errors before they reach your database or API.
+
+**The Problem Without Zod:**
+
+```typescript
+// TypeScript says this is fine at compile time...
+interface CreateInvoiceInput {
+  amount: number;
+}
+
+// But at runtime, a user could submit:
+const badData = { amount: -1000 }; // Negative amount!
+const badData2 = { amount: "not a number" }; // Wrong type!
+```
+
+**The Solution With Zod:**
+
+```typescript
+import { z } from 'zod';
+
+const CreateInvoiceSchema = z.object({
+  amount: z.number().nonnegative('Amount cannot be negative').min(0.01, 'Amount must be at least $0.01'),
+});
+
+// This catches errors BEFORE they reach the database
+const result = CreateInvoiceSchema.safeParse({ amount: -1000 });
+// result.success = false
+// result.error contains helpful error messages
+```
+
+### Our Zod Implementation
+
+Located in `lib/schemas/invoice.schema.ts`:
+
+```typescript
+export const CreateInvoiceSchema = z.object({
+  customer_name: z.string().trim().min(1, 'Customer name is required'),
+  customer_email: z.string().trim().email('Invalid email').optional(),
+  amount: z.number().nonnegative().min(0.01, 'Amount must be at least $0.01'),
+  due_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  items: z.array(InvoiceItemSchema).min(1, 'At least one item required'),
+  // ... more fields
+}).refine((data) => {
+  // Custom validation: due date must be >= issue date
+  return new Date(data.due_date) >= new Date(data.issue_date);
+}, {
+  message: 'Due date must be on or after issue date',
+  path: ['due_date'],
+});
+```
+
+### Validation Flow
+
+**Server-Side Validation (app/actions/invoices.ts:78-90):**
+
+```typescript
+export async function createInvoice(input: CreateInvoiceInput) {
+  // Validate input
+  const validation = validateCreateInvoice(input);
+
+  if (!validation.success) {
+    return {
+      success: false,
+      error: 'Invalid invoice data',
+      validationErrors: formatZodErrors(validation.error),
+    };
+  }
+
+  // Now we know data is valid and safe
+  const validatedData = validation.data;
+  // ... proceed to database
+}
+```
+
+**Client-Side Validation (components/invoices/invoice-dialog.tsx:140-154):**
+
+```typescript
+const handleSubmit = async (e: React.FormEvent) => {
+  // Validate BEFORE sending to server
+  const validation = validateCreateInvoice(invoiceData);
+
+  if (!validation.success) {
+    // Show errors immediately to user
+    setValidationErrors(formatZodErrors(validation.error));
+    return; // Stop submission
+  }
+
+  // Submit to server
+  await createInvoice(invoiceData);
+};
+```
+
+### Type Inference
+
+The magic of Zod: **Define schemas once, get TypeScript types automatically**
+
+```typescript
+// Define schema
+export const InvoiceSchema = z.object({
+  id: z.string().uuid(),
+  customer_name: z.string(),
+  amount: z.number(),
+  // ...
+});
+
+// Get TypeScript type automatically
+export type Invoice = z.infer<typeof InvoiceSchema>;
+
+// No need to duplicate type definitions!
+```
+
+### Benefits
+
+1. **Runtime Safety** - Catches invalid data that TypeScript can't
+2. **Better Error Messages** - Custom, user-friendly messages
+3. **Type Inference** - Single source of truth for types
+4. **Transformation** - Automatically trim strings, parse dates, etc.
+5. **Complex Validation** - Custom rules with `.refine()`
+
+---
+
+## How AG Grid Works
+
+### What is AG Grid?
+
+AG Grid is a professional-grade data grid used by Fortune 500 companies. It provides advanced table features out of the box.
+
+**Why We Switched From Basic Table:**
+- ✅ Sortable columns (click headers)
+- ✅ Column resizing & reordering (drag to resize/reorder)
+- ✅ Built-in pagination
+- ✅ Export to CSV
+- ✅ Virtual scrolling (handles 1000s of rows efficiently)
+- ✅ Row selection
+- ✅ Per-column filtering
+
+### Our AG Grid Implementation
+
+Located in `components/invoices/invoice-table-ag-grid.tsx`:
+
+**Column Definitions:**
+
+```typescript
+const columnDefs = useMemo<ColDef[]>(() => [
+  {
+    field: 'invoice_number',
+    headerName: 'Invoice',
+    width: 150,
+    sortable: true,
+    filter: true,
+    pinned: 'left', // Always visible when scrolling
+    cellStyle: { fontWeight: 600 }, // Custom styling
+  },
+  {
+    field: 'amount',
+    headerName: 'Amount',
+    cellRenderer: CurrencyRenderer, // Custom display
+    type: 'rightAligned',
+  },
+  // ... more columns
+], []);
+```
+
+**Custom Cell Renderers:**
+
+```typescript
+// Show colored badges for status
+const StatusCellRenderer = (props: { value: InvoiceStatus }) => {
+  return (
+    <Badge variant="secondary" className={statusColors[props.value]}>
+      {props.value.charAt(0).toUpperCase() + props.value.slice(1)}
+    </Badge>
+  );
+};
+
+// Format currency
+const CurrencyRenderer = (props: { value: number }) => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(props.value);
+};
+```
+
+**The Grid Component:**
+
+```typescript
+<AgGridReact
+  ref={gridRef}
+  rowData={filteredInvoices}
+  columnDefs={columnDefs}
+  pagination={true}
+  paginationPageSize={20}
+  rowSelection="multiple"
+  enableCellTextSelection={true}
+/>
+```
+
+### Export Feature
+
+```typescript
+const handleExportCSV = () => {
+  gridRef.current?.api.exportDataAsCsv({
+    fileName: `invoices-${new Date().toISOString().split('T')[0]}.csv`,
+  });
+};
+```
+
+Users can click "Export CSV" to download all invoice data.
+
+### Styling
+
+AG Grid requires CSS imports:
+
+```typescript
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-quartz.css';
+
+// Custom Preline theme overlay
+import '@/app/ag-grid-preline-theme.css';
+```
+
+**Dynamic Dark Mode Support:**
+
+AG Grid needs dynamic class switching for dark mode. We use `next-themes` to detect the current theme:
+
+```tsx
+import { useTheme } from 'next-themes';
+
+export function InvoiceTableAgGrid() {
+  const { theme } = useTheme();
+
+  return (
+    <div className={theme === 'dark' ? 'ag-theme-quartz-dark' : 'ag-theme-quartz'}>
+      <AgGridReact ... />
+    </div>
+  );
+}
+```
+
+This ensures the grid properly switches themes when the user toggles dark mode, matching the rest of the application.
+
+### Preline UI Integration
+
+We've created a custom theme (`app/ag-grid-preline-theme.css`) that makes AG Grid match Preline's official table design patterns **and** your application's color scheme. This ensures visual consistency across your application.
+
+**App Color Scheme Integration:**
+- **Background**: `hsl(222.2, 84%, 4.9%)` (your `--background` color)
+- **Borders**: `hsl(217.2, 32.6%, 17.5%)` (your `--border` color)
+- **Text**: `hsl(210, 40%, 98%)` (your `--foreground` color)
+- **Primary**: `hsl(217.2, 91.2%, 59.8%)` (your `--primary` blue)
+
+The dark mode theme uses your exact CSS variables from `app/globals.css`, ensuring perfect color matching with cards, buttons, and other UI elements.
+
+**Preline Design Patterns Applied:**
+- **Headers**: `bg-gray-50` with `text-xs font-semibold uppercase` styling (light mode)
+- **Headers (Dark)**: `slate-800` background matching your app's slate color scheme
+- **Borders**: `divide-gray-200` (light mode) / slate borders (dark mode)
+- **Hover States**: `hover:bg-gray-100` (light) / `hover:bg-slate-800` (dark)
+- **Padding**: `px-6 py-3` (matching Preline's cell spacing)
+- **Container**: `rounded-xl` corners with `shadow-2xs` (like Preline cards)
+
+**Based on Official Preline Examples:**
+- Color palette from: `https://preline.co/examples/application-tables.html`
+- Typography from: `https://preline.co/docs/tables.html`
+- The styling is extracted from Preline's actual table components, ensuring perfect consistency
+
+**For detailed styling information, see [STYLING_GUIDE.md](./STYLING_GUIDE.md)**
+
+### Benefits
+
+1. **Professional UI** - Looks like enterprise software
+2. **Performance** - Virtual scrolling handles large datasets
+3. **Built-in Features** - Sorting, filtering, pagination, export
+4. **Customizable** - Custom cell renderers for any display logic
+5. **Accessible** - ARIA support built-in
+
+---
+
+## How Clerk Billing Works
+
+### What is Clerk Billing?
+
+Clerk Billing (currently in Beta) is an all-in-one subscription management solution for B2B SaaS. It eliminates the need for custom billing code.
+
+**What It Handles:**
+- Subscription plans (Free, Pro, Enterprise)
+- Usage tracking (invoices per month)
+- Feature gating (export, API access, etc.)
+- Payment processing (via Stripe)
+- Upgrade/downgrade flows
+
+### Setup Requirements
+
+**⚠️ IMPORTANT: Clerk Billing requires manual dashboard setup**
+
+1. Go to Clerk Dashboard → Billing Settings
+2. Connect your Stripe account (required for production)
+3. Create subscription plans under "Plans for Organizations"
+4. Define features for each plan
+5. Make plans publicly available
+
+### Our Implementation
+
+**Plan Definitions (lib/billing/subscription-limits.ts:18-56):**
+
+```typescript
+export const PLANS = {
+  free: {
+    id: 'free',
+    name: 'Free',
+    invoiceLimit: 10, // 10 invoices/month
+    features: ['basic_templates', 'email_support'],
+  },
+  pro: {
+    id: 'pro',
+    name: 'Pro',
+    invoiceLimit: 100, // 100 invoices/month
+    features: ['advanced_templates', 'priority_support', 'export_csv', 'api_access'],
+  },
+  enterprise: {
+    id: 'enterprise',
+    name: 'Enterprise',
+    invoiceLimit: Infinity, // Unlimited
+    features: ['all_features', 'dedicated_support', 'custom_integrations'],
+  },
+};
+```
+
+**Checking Subscription Limits (app/actions/invoices.ts:101-124):**
+
+```typescript
+export async function createInvoice(input: CreateInvoiceInput) {
+  // ... validation
+
+  // Check if organization can create another invoice
+  const limitCheck = await canCreateInvoice(allInvoices, orgId);
+
+  if (!limitCheck.allowed) {
+    return {
+      success: false,
+      error: `You've reached your ${limitCheck.planName} plan limit. Upgrade to Pro for more invoices.`,
+    };
+  }
+
+  // Proceed to create invoice
+}
+```
+
+**Usage Tracking (lib/billing/subscription-limits.ts:70-80):**
+
+```typescript
+export async function getMonthlyInvoiceCount(invoices: Array<{ created_at: string }>) {
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  const thisMonthInvoices = invoices.filter(
+    (inv) => new Date(inv.created_at) >= startOfMonth
+  );
+
+  return thisMonthInvoices.length;
+}
+```
+
+### Billing Page
+
+Located at `app/billing/page.tsx`, it shows:
+- Current plan and usage
+- Progress bar (e.g., "7 / 10 invoices used")
+- Pricing cards for all plans
+- Upgrade buttons
+- Setup instructions
+
+**Usage Display:**
+
+```typescript
+const usagePercentage = (invoiceCount / currentPlanData.invoiceLimit) * 100;
+
+<Progress value={Math.min(usagePercentage, 100)} />
+
+{usagePercentage >= 80 && (
+  <div className="warning">
+    You've used {Math.round(usagePercentage)}% of your limit. Consider upgrading.
+  </div>
+)}
+```
+
+### Feature Gating (Future Implementation)
+
+Once Clerk Billing is configured in the dashboard, you can use:
+
+```typescript
+import { useAuth } from '@clerk/nextjs';
+
+// In a component
+const { has } = useAuth();
+const canExport = has({ feature: 'export_csv' });
+
+// Or as a component
+import { Protect } from '@clerk/nextjs';
+
+<Protect
+  feature="export_csv"
+  fallback={<p>Upgrade to Pro to export invoices.</p>}
+>
+  <Button onClick={handleExport}>Export CSV</Button>
+</Protect>
+```
+
+### Important Notes
+
+**⚠️ Clerk Billing is in Beta**
+- APIs may change
+- Pin your SDK versions: `"@clerk/nextjs": "^6.33.3"`
+- Test thoroughly before production
+
+**Current Implementation**
+- Demo UI is ready
+- Subscription limits are enforced
+- To enable real billing:
+  1. Complete Clerk Dashboard setup
+  2. Replace `getCurrentPlan()` with `has({ plan: 'pro' })`
+  3. Use Clerk's `<PricingTable />` component for payments
+
+### Benefits
+
+1. **Zero Integration Code** - No Stripe webhooks to write
+2. **Ready-to-Use UI** - `<PricingTable />` component handles checkout
+3. **Automatic Sync** - Subscription status syncs with Clerk auth
+4. **Feature Gating** - Use `has()` or `<Protect>` to gate features
+5. **Organization Billing** - Perfect for B2B multi-tenant apps
+
+---
+
+## How the Command Palette Works
+
+### What is a Command Palette?
+
+A command palette is a keyboard-driven interface popularized by tools like VS Code, Raycast, and Linear. It provides quick access to all application actions through search.
+
+**Benefits:**
+- ⌨️ Keyboard-first workflow (power users love this)
+- 🔍 Fuzzy search finds commands instantly
+- 🎯 Single entry point for all actions
+- 🚀 No need to remember where buttons are
+
+### Our Implementation
+
+Located in:
+- `components/command-palette.tsx` - Main component
+- `lib/commands/types.ts` - TypeScript types
+- `lib/commands/registry.ts` - Command definitions
+
+**Tech Stack:**
+- **Preline Pro** - Modal UI and styling
+- **Fuse.js** - Fuzzy search library
+- **Next.js** - Router integration
+- **Clerk** - Sign-out integration
+- **next-themes** - Dark mode toggle
+
+### Opening the Command Palette
+
+**Global Keyboard Shortcut:**
+
+```typescript
+// Anywhere in the app, press:
+// Mac: cmd+k
+// Windows/Linux: ctrl+k
+
+useEffect(() => {
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      window.HSOverlay.open('#hs-pro-dnsm');
+    }
+  };
+  document.addEventListener('keydown', handleKeyDown);
+}, []);
+```
+
+### Command Registry
+
+All commands are defined in `lib/commands/registry.ts`:
+
+```typescript
+export const commandRegistry: CommandRegistry = [
+  {
+    id: 'new-invoice',
+    label: 'New Invoice',
+    description: 'Create a new invoice',
+    icon: Plus,
+    keywords: ['new', 'create', 'invoice', 'bill', 'inv', 'add'],
+    group: 'actions',
+    shortcut: '⌘N',
+  },
+  // ... more commands
+];
+```
+
+**Command Groups:**
+1. **Actions** - Create invoice, export data
+2. **Navigation** - Go to dashboard, billing
+3. **Settings** - Toggle theme, sign out
+4. **AI** - Ask Nelli (coming soon)
+
+### Fuzzy Search
+
+Powered by **Fuse.js** for intelligent search:
+
+```typescript
+const fuse = new Fuse(commandRegistry, {
+  keys: ['label', 'keywords', 'description'],
+  threshold: 0.3,
+});
+
+// User types: "inv"
+// Matches: "New Invoice" (via keywords: ['inv', 'invoice'])
+```
+
+**How it works:**
+- Searches across `label`, `keywords`, and `description`
+- `threshold: 0.3` allows typos and partial matches
+- Results ranked by relevance score
+
+**Examples:**
+- Type "inv" → Finds "New Invoice"
+- Type "dark" → Finds "Toggle Theme"
+- Type "bill" → Finds "Go to Billing" and "New Invoice"
+
+### Keyboard Navigation
+
+**Inside the Command Palette:**
+- `↑` / `↓` - Navigate through commands
+- `Enter` - Execute selected command
+- `Esc` - Close palette
+
+```typescript
+switch (e.key) {
+  case 'ArrowDown':
+    setSelectedIndex(i => Math.min(i + 1, filteredCommands.length - 1));
+    break;
+  case 'ArrowUp':
+    setSelectedIndex(i => Math.max(i - 1, 0));
+    break;
+  case 'Enter':
+    executeCommand(filteredCommands[selectedIndex]);
+    break;
+}
+```
+
+### Command Execution
+
+Commands are executed via a switch statement:
+
+```typescript
+const executeCommand = async (command: Command) => {
+  switch (command.id) {
+    case 'new-invoice':
+      if (onCreateInvoice) onCreateInvoice();
+      break;
+
+    case 'goto-dashboard':
+      router.push('/dashboard');
+      break;
+
+    case 'toggle-theme':
+      setTheme(theme === 'dark' ? 'light' : 'dark');
+      break;
+
+    case 'sign-out':
+      await signOut();
+      router.push('/');
+      break;
+
+    case 'ask-nelli':
+      alert('Nelli AI Assistant - Coming soon!');
+      break;
+  }
+
+  // Close modal after execution
+  window.HSOverlay.close('#hs-pro-dnsm');
+};
+```
+
+### Future: Nelli AI Assistant
+
+The command palette is ready for **Nelli**, our AI assistant:
+
+**Planned Features:**
+- Natural language queries ("Show me unpaid invoices")
+- Smart suggestions ("Create invoice for Acme Corp based on last month")
+- Data analysis ("What's our revenue this quarter?")
+- Automation ("Send reminders for all overdue invoices")
+
+**Implementation Path:**
+1. Add AI API integration (OpenAI, Anthropic)
+2. Create chat interface component
+3. Connect to invoice data via server actions
+4. Add to command palette as "Ask Nelli" (already exists as placeholder)
+
+### Adding New Commands
+
+**Step 1: Define command in registry**
+
+```typescript
+// lib/commands/registry.ts
+{
+  id: 'view-analytics',
+  label: 'View Analytics',
+  description: 'Open analytics dashboard',
+  icon: BarChart,
+  keywords: ['analytics', 'stats', 'reports', 'insights'],
+  group: 'navigation',
+}
+```
+
+**Step 2: Handle execution**
+
+```typescript
+// components/command-palette.tsx
+case 'view-analytics':
+  router.push('/analytics');
+  break;
+```
+
+**That's it!** The command palette automatically:
+- ✅ Displays your command
+- ✅ Makes it searchable via fuzzy search
+- ✅ Handles keyboard navigation
+- ✅ Groups it appropriately
+
+### Preline Pro Integration
+
+We use Preline Pro's modal component (`HSOverlay`) for the UI:
+
+**TypeScript Types:**
+
+```typescript
+interface HSOverlayAPI {
+  open: (selector: string) => void;
+  close: (selector: string) => void;
+}
+
+declare global {
+  interface Window {
+    HSOverlay?: HSOverlayAPI;
+  }
+}
+```
+
+**Styling:**
+- Follows Preline's design system
+- Supports dark mode automatically
+- Matches the rest of the application
+- Mobile responsive
+
+### Benefits
+
+1. **Productivity** - Actions are 1-2 keystrokes away
+2. **Discoverability** - Users find features through search
+3. **Consistency** - Same interface for all actions
+4. **Extensibility** - Easy to add new commands
+5. **Accessibility** - Keyboard-first design
+6. **Future-Ready** - Prepared for AI integration
+
+---
+
+## Updated Tech Stack
+
+This application now uses:
+
+1. **Next.js 15** - App Router, Server Components, Server Actions
+2. **Clerk** - Authentication, Organizations, B2B Billing (Beta)
+3. **Supabase** - PostgreSQL database, Row Level Security
+4. **Zod** - Runtime schema validation
+5. **AG Grid** - Professional data grid
+6. **Fuse.js** - Fuzzy search for command palette
+7. **Preline Pro** - UI component library with command palette
+8. **TypeScript** - Type safety
+9. **Tailwind CSS** - Styling
+10. **shadcn/ui** - Additional UI components
+
+---
+
 ## Next Steps for Learning
 
-1. **Try modifying mock data** - Add your own test invoices in `supabase-schema.sql`
-2. **Add a new field** - Add "invoice_terms" field to invoices table and UI
-3. **Create a new entity** - Build a "Customers" table with similar RLS policies
-4. **Add real-time updates** - Use Supabase subscriptions to see changes live
-5. **Deploy** - Deploy to Vercel and see it in production
+1. **Try the command palette** - Press `cmd+k` (Mac) or `ctrl+k` (Windows) and explore commands
+2. **Test fuzzy search** - Type "inv" to find "New Invoice", "dark" for "Toggle Theme"
+3. **Try modifying mock data** - Add your own test invoices in `supabase-schema.sql`
+4. **Test Zod validation** - Try submitting invalid forms and see error messages
+5. **Explore AG Grid features** - Click column headers to sort, drag edges to resize
+6. **Configure Clerk Billing** - Follow setup instructions in the billing page
+7. **Add a new command** - Add a custom command to the command palette registry
+8. **Add a new field** - Add "invoice_terms" field with Zod validation
+9. **Create a new entity** - Build a "Customers" table with similar patterns
+10. **Deploy** - Deploy to Vercel and see it in production
 
-You now understand how modern B2B SaaS applications work! 🎉
+You now understand how modern, production-ready B2B SaaS applications work! 🎉

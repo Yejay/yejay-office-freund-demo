@@ -1,0 +1,331 @@
+/**
+ * AG Grid - Preline UI Theme
+ *
+ * This custom theme styles AG Grid to match Preline's official table design patterns.
+ * Based on Preline's application table examples: https://preline.co/examples/application-tables.html
+ *
+ * Color palette extracted from Preline UI:
+ * - Headers: bg-gray-50 (#f9fafb) / dark:bg-neutral-800 (#1f2937)
+ * - Borders: divide-gray-200 (#e5e7eb) / dark:divide-neutral-700 (#404040)
+ * - Hover: hover:bg-gray-100 (#f3f4f6) / dark:hover:bg-gray-700 (#374151)
+ * - Text: text-gray-800 (#1f2937) / dark:text-neutral-200 (#e5e7eb)
+ * - Background: bg-white (#ffffff) / dark:bg-neutral-900 (#171717)
+ *
+ * Typography from Preline:
+ * - Headers: text-xs (0.75rem), font-semibold (600), uppercase
+ * - Body: text-sm (0.875rem)
+ *
+ * Spacing from Preline:
+ * - Cells: px-6 py-3 (padding: 12px 24px)
+ */
+
+/* ============================================================================
+   LIGHT MODE STYLING
+   ============================================================================ */
+
+/* Container - Match Preline's card styling */
+.ag-theme-quartz {
+  --ag-background-color: #ffffff;
+  --ag-foreground-color: #1f2937;
+  --ag-border-color: #e5e7eb;
+  --ag-border-radius: 0.75rem; /* rounded-xl like Preline */
+
+  /* Remove AG Grid's default borders, we'll add Preline's style */
+  border: 1px solid #e5e7eb !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important; /* shadow-2xs */
+  overflow: hidden; /* Ensure rounded corners work */
+}
+
+/* Header Row - Match Preline's bg-gray-50 */
+.ag-theme-quartz .ag-header {
+  background-color: #f9fafb !important;
+  border-bottom: 1px solid #e5e7eb !important;
+}
+
+/* Header Cells - Match Preline's table header styling */
+.ag-theme-quartz .ag-header-cell {
+  background-color: #f9fafb !important;
+  color: #1f2937 !important;
+  font-size: 0.75rem !important; /* text-xs */
+  font-weight: 600 !important; /* font-semibold */
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  padding: 12px 24px !important; /* py-3 px-6 */
+  border-right: none !important; /* Remove vertical dividers like Preline */
+}
+
+/* Header Cell Label */
+.ag-theme-quartz .ag-header-cell-label {
+  color: #1f2937 !important;
+}
+
+/* Sort Icons - Make them match Preline's text color */
+.ag-theme-quartz .ag-header-icon {
+  color: #6b7280 !important; /* text-gray-500 */
+}
+
+/* Body Rows - Match Preline's white background */
+.ag-theme-quartz .ag-row {
+  background-color: #ffffff !important;
+  border-bottom: 1px solid #e5e7eb !important; /* divide-gray-200 */
+  color: #1f2937 !important;
+}
+
+/* Alternate Row Styling (optional zebra striping like some Preline examples) */
+.ag-theme-quartz .ag-row-odd {
+  background-color: #ffffff !important;
+}
+
+.ag-theme-quartz .ag-row-even {
+  background-color: #ffffff !important;
+}
+
+/* Row Hover - Match Preline's hover:bg-gray-100 */
+.ag-theme-quartz .ag-row:hover {
+  background-color: #f3f4f6 !important;
+}
+
+/* Cells - Match Preline's padding and text */
+.ag-theme-quartz .ag-cell {
+  padding: 12px 24px !important; /* py-3 px-6 */
+  font-size: 0.875rem !important; /* text-sm */
+  color: #1f2937 !important;
+  border-right: none !important; /* No vertical dividers */
+  line-height: 1.25rem !important;
+}
+
+/* Pinned Columns - Keep same background */
+.ag-theme-quartz .ag-cell.ag-cell-last-left-pinned {
+  border-right: 1px solid #e5e7eb !important;
+}
+
+.ag-theme-quartz .ag-cell.ag-cell-first-right-pinned {
+  border-left: 1px solid #e5e7eb !important;
+}
+
+/* Pagination - Match Preline's button/tab styling */
+.ag-theme-quartz .ag-paging-panel {
+  border-top: 1px solid #e5e7eb !important;
+  background-color: #ffffff !important;
+  padding: 12px 24px !important;
+  font-size: 0.875rem !important;
+  color: #6b7280 !important; /* text-gray-500 */
+}
+
+.ag-theme-quartz .ag-paging-button {
+  color: #3b82f6 !important; /* text-blue-500 */
+  background-color: transparent !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 0.375rem !important;
+  padding: 4px 12px !important;
+  font-size: 0.875rem !important;
+  margin: 0 4px !important;
+}
+
+.ag-theme-quartz .ag-paging-button:hover:not(.ag-disabled) {
+  background-color: #f3f4f6 !important;
+  border-color: #d1d5db !important;
+}
+
+.ag-theme-quartz .ag-paging-button.ag-disabled {
+  color: #9ca3af !important;
+  cursor: not-allowed !important;
+}
+
+/* Selected Rows - Match Preline's selection color */
+.ag-theme-quartz .ag-row-selected {
+  background-color: #eff6ff !important; /* blue-50 */
+}
+
+.ag-theme-quartz .ag-row-selected:hover {
+  background-color: #dbeafe !important; /* blue-100 */
+}
+
+/* Focus Border - Use Preline's primary blue */
+.ag-theme-quartz .ag-cell-focus,
+.ag-theme-quartz .ag-cell-focus:focus-within {
+  border: 1px solid #3b82f6 !important; /* blue-500 */
+  outline: none !important;
+}
+
+/* ============================================================================
+   DARK MODE STYLING - Matching App's Slate Color Scheme
+   ============================================================================ */
+
+.ag-theme-quartz-dark {
+  --ag-background-color: hsl(222.2, 84%, 4.9%); /* --background: #020617 */
+  --ag-foreground-color: hsl(210, 40%, 98%); /* --foreground */
+  --ag-border-color: hsl(217.2, 32.6%, 17.5%); /* --border: #1e293b */
+  --ag-border-radius: 0.75rem;
+
+  border: 1px solid hsl(217.2, 32.6%, 17.5%) !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3) !important;
+  overflow: hidden;
+}
+
+/* Header Row - Dark mode */
+.ag-theme-quartz-dark .ag-header {
+  background-color: hsl(217.2, 32.6%, 17.5%) !important; /* slate-800 */
+  border-bottom: 1px solid hsl(217.2, 32.6%, 17.5%) !important;
+}
+
+.ag-theme-quartz-dark .ag-header-cell {
+  background-color: hsl(217.2, 32.6%, 17.5%) !important;
+  color: hsl(210, 40%, 98%) !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  padding: 12px 24px !important;
+  border-right: none !important;
+}
+
+.ag-theme-quartz-dark .ag-header-cell-label {
+  color: hsl(210, 40%, 98%) !important;
+}
+
+.ag-theme-quartz-dark .ag-header-icon {
+  color: hsl(215, 20.2%, 65.1%) !important; /* --muted-foreground */
+}
+
+/* Body Rows - Dark mode */
+.ag-theme-quartz-dark .ag-row {
+  background-color: hsl(222.2, 84%, 4.9%) !important;
+  border-bottom: 1px solid hsl(217.2, 32.6%, 17.5%) !important;
+  color: hsl(210, 40%, 98%) !important;
+}
+
+.ag-theme-quartz-dark .ag-row-odd {
+  background-color: hsl(222.2, 84%, 4.9%) !important;
+}
+
+.ag-theme-quartz-dark .ag-row-even {
+  background-color: hsl(222.2, 84%, 4.9%) !important;
+}
+
+/* Row Hover - Dark mode */
+.ag-theme-quartz-dark .ag-row:hover {
+  background-color: hsl(217.2, 32.6%, 17.5%) !important; /* slate-800 */
+}
+
+/* Cells - Dark mode */
+.ag-theme-quartz-dark .ag-cell {
+  padding: 12px 24px !important;
+  font-size: 0.875rem !important;
+  color: hsl(210, 40%, 98%) !important;
+  border-right: none !important;
+  line-height: 1.25rem !important;
+}
+
+.ag-theme-quartz-dark .ag-cell.ag-cell-last-left-pinned {
+  border-right: 1px solid hsl(217.2, 32.6%, 17.5%) !important;
+}
+
+.ag-theme-quartz-dark .ag-cell.ag-cell-first-right-pinned {
+  border-left: 1px solid hsl(217.2, 32.6%, 17.5%) !important;
+}
+
+/* Pagination - Dark mode */
+.ag-theme-quartz-dark .ag-paging-panel {
+  border-top: 1px solid hsl(217.2, 32.6%, 17.5%) !important;
+  background-color: hsl(222.2, 84%, 4.9%) !important;
+  padding: 12px 24px !important;
+  font-size: 0.875rem !important;
+  color: hsl(215, 20.2%, 65.1%) !important;
+}
+
+.ag-theme-quartz-dark .ag-paging-button {
+  color: hsl(217.2, 91.2%, 59.8%) !important; /* --primary */
+  background-color: transparent !important;
+  border: 1px solid hsl(217.2, 32.6%, 17.5%) !important;
+  border-radius: 0.375rem !important;
+  padding: 4px 12px !important;
+  font-size: 0.875rem !important;
+  margin: 0 4px !important;
+}
+
+.ag-theme-quartz-dark .ag-paging-button:hover:not(.ag-disabled) {
+  background-color: hsl(217.2, 32.6%, 17.5%) !important;
+  border-color: hsl(217.2, 32.6%, 17.5%) !important;
+}
+
+.ag-theme-quartz-dark .ag-paging-button.ag-disabled {
+  color: hsl(215, 20.2%, 65.1%) !important;
+  cursor: not-allowed !important;
+}
+
+/* Selected Rows - Dark mode */
+.ag-theme-quartz-dark .ag-row-selected {
+  background-color: hsl(217.2, 32.6%, 17.5%) !important; /* slate-800 */
+  border-left: 2px solid hsl(217.2, 91.2%, 59.8%) !important; /* primary accent */
+}
+
+.ag-theme-quartz-dark .ag-row-selected:hover {
+  background-color: hsl(217.2, 32.6%, 22%) !important; /* slightly lighter slate */
+}
+
+/* Focus Border - Dark mode */
+.ag-theme-quartz-dark .ag-cell-focus,
+.ag-theme-quartz-dark .ag-cell-focus:focus-within {
+  border: 1px solid hsl(217.2, 91.2%, 59.8%) !important; /* --primary */
+  outline: none !important;
+}
+
+/* ============================================================================
+   LOADING OVERLAY
+   ============================================================================ */
+
+.ag-theme-quartz .ag-overlay-loading-wrapper,
+.ag-theme-quartz-dark .ag-overlay-loading-wrapper {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.ag-theme-quartz-dark .ag-overlay-loading-wrapper {
+  background-color: hsla(222.2, 84%, 4.9%, 0.9) !important;
+}
+
+/* ============================================================================
+   SCROLLBARS (Preline uses custom scrollbar styling)
+   ============================================================================ */
+
+.ag-theme-quartz .ag-body-horizontal-scroll-viewport::-webkit-scrollbar,
+.ag-theme-quartz .ag-body-vertical-scroll-viewport::-webkit-scrollbar,
+.ag-theme-quartz-dark .ag-body-horizontal-scroll-viewport::-webkit-scrollbar,
+.ag-theme-quartz-dark .ag-body-vertical-scroll-viewport::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.ag-theme-quartz .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-track,
+.ag-theme-quartz .ag-body-vertical-scroll-viewport::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+
+.ag-theme-quartz-dark .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-track,
+.ag-theme-quartz-dark .ag-body-vertical-scroll-viewport::-webkit-scrollbar-track {
+  background: hsl(217.2, 32.6%, 17.5%); /* slate-800 */
+}
+
+.ag-theme-quartz .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-thumb,
+.ag-theme-quartz .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+.ag-theme-quartz-dark .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-thumb,
+.ag-theme-quartz-dark .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb {
+  background: hsl(215, 20.2%, 65.1%); /* muted-foreground */
+  border-radius: 4px;
+}
+
+.ag-theme-quartz .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-thumb:hover,
+.ag-theme-quartz .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+.ag-theme-quartz-dark .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-thumb:hover,
+.ag-theme-quartz-dark .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb:hover {
+  background: hsl(217.2, 91.2%, 59.8%); /* primary on hover */
+}

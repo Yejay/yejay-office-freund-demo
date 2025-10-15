@@ -1,7 +1,15 @@
 'use server';
 
 import { createClerkSupabaseClient } from '@/lib/supabase/clerk-server';
-import { Invoice, CreateInvoiceInput, UpdateInvoiceInput } from '@/lib/types/invoice';
+import {
+  Invoice,
+  CreateInvoiceInput,
+  UpdateInvoiceInput,
+  validateCreateInvoice,
+  validateUpdateInvoice,
+  formatZodErrors,
+} from '@/lib/types/invoice';
+import { canCreateInvoice } from '@/lib/billing/subscription-limits';
 import { revalidatePath } from 'next/cache';
 
 function generateInvoiceNumber(): string {
@@ -56,12 +64,70 @@ export async function getInvoiceById(id: string): Promise<Invoice | null> {
   }
 }
 
-export async function createInvoice(input: CreateInvoiceInput): Promise<{ success: boolean; invoice?: Invoice; error?: string }> {
+export async function createInvoice(input: CreateInvoiceInput): Promise<{ success: boolean; invoice?: Invoice; error?: string; validationErrors?: Record<string, string> }> {
   try {
+    // ============================================================================
+    // STEP 1: Validate input with Zod
+    // ============================================================================
+    // This catches invalid data BEFORE it reaches the database
+    // Examples of what Zod catches:
+    // - Missing required fields
+    // - Invalid email formats
+    // - Negative amounts
+    // - Due date before issue date
+    // - Empty item arrays
+    const validation = validateCreateInvoice(input);
+
+    if (!validation.success) {
+      // Format errors for user-friendly display
+      const validationErrors = formatZodErrors(validation.error);
+      console.error('Validation failed:', validationErrors);
+
+      return {
+        success: false,
+        error: 'Invalid invoice data. Please check your inputs.',
+        validationErrors,
+      };
+    }
+
+    // At this point, we know the data is valid
+    const validatedData = validation.data;
+
+    // ============================================================================
+    // STEP 2: Get authenticated context
+    // ============================================================================
     const { supabase, orgId, userId } = await createClerkSupabaseClient();
 
+    // ============================================================================
+    // STEP 3: Check subscription limits
+    // ============================================================================
+    // Fetch all invoices to check monthly usage
+    const { data: allInvoices, error: fetchError } = await supabase
+      .from('invoices')
+      .select('created_at')
+      .eq('org_id', orgId);
+
+    if (fetchError) {
+      console.error('Error fetching invoices for limit check:', fetchError);
+      return { success: false, error: 'Failed to check subscription limits' };
+    }
+
+    // Check if organization can create another invoice
+    const limitCheck = await canCreateInvoice(allInvoices || []);
+
+    if (!limitCheck.allowed) {
+      console.warn('Invoice creation blocked by subscription limit:', limitCheck);
+      return {
+        success: false,
+        error: limitCheck.reason || 'Subscription limit reached',
+      };
+    }
+
+    // ============================================================================
+    // STEP 4: Create invoice in database
+    // ============================================================================
     const invoiceData = {
-      ...input,
+      ...validatedData,
       invoice_number: generateInvoiceNumber(),
       org_id: orgId,
       user_id: userId,
@@ -78,7 +144,11 @@ export async function createInvoice(input: CreateInvoiceInput): Promise<{ succes
       return { success: false, error: error.message };
     }
 
+    // ============================================================================
+    // STEP 5: Revalidate cache and return success
+    // ============================================================================
     revalidatePath('/dashboard');
+    revalidatePath('/billing'); // Also refresh billing page to update usage
     return { success: true, invoice: data };
   } catch (error) {
     console.error('Error in createInvoice:', error);
@@ -86,11 +156,35 @@ export async function createInvoice(input: CreateInvoiceInput): Promise<{ succes
   }
 }
 
-export async function updateInvoice(input: UpdateInvoiceInput): Promise<{ success: boolean; invoice?: Invoice; error?: string }> {
+export async function updateInvoice(input: UpdateInvoiceInput): Promise<{ success: boolean; invoice?: Invoice; error?: string; validationErrors?: Record<string, string> }> {
   try {
+    // ============================================================================
+    // STEP 1: Validate input with Zod
+    // ============================================================================
+    const validation = validateUpdateInvoice(input);
+
+    if (!validation.success) {
+      const validationErrors = formatZodErrors(validation.error);
+      console.error('Validation failed:', validationErrors);
+
+      return {
+        success: false,
+        error: 'Invalid invoice data. Please check your inputs.',
+        validationErrors,
+      };
+    }
+
+    const validatedData = validation.data;
+
+    // ============================================================================
+    // STEP 2: Get authenticated context
+    // ============================================================================
     const { supabase, orgId } = await createClerkSupabaseClient();
 
-    const { id, ...updateData } = input;
+    // ============================================================================
+    // STEP 3: Update invoice in database
+    // ============================================================================
+    const { id, ...updateData } = validatedData;
 
     const { data, error } = await supabase
       .from('invoices')

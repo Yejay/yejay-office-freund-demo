@@ -1,7 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Invoice, InvoiceItem, InvoiceStatus, PaymentMethod } from '@/lib/types/invoice';
+import {
+  Invoice,
+  InvoiceItem,
+  InvoiceStatus,
+  PaymentMethod,
+  validateCreateInvoice,
+  validateUpdateInvoice,
+  formatZodErrors,
+} from '@/lib/types/invoice';
 import {
   Dialog,
   DialogContent,
@@ -22,7 +30,7 @@ import {
 } from '@/components/ui/select';
 import { createInvoice, updateInvoice } from '@/app/actions/invoices';
 import { useRouter } from 'next/navigation';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, AlertCircle } from 'lucide-react';
 
 interface InvoiceDialogProps {
   open: boolean;
@@ -33,6 +41,13 @@ interface InvoiceDialogProps {
 export function InvoiceDialog({ open, onOpenChange, invoice }: InvoiceDialogProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // ============================================================================
+  // Validation Errors State
+  // ============================================================================
+  // Stores field-specific validation errors from Zod
+  // Example: { customer_name: 'Customer name is required', amount: 'Amount must be positive' }
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const [formData, setFormData] = useState({
     customer_name: '',
@@ -50,6 +65,9 @@ export function InvoiceDialog({ open, onOpenChange, invoice }: InvoiceDialogProp
   ]);
 
   useEffect(() => {
+    // Clear validation errors when dialog opens/closes
+    setValidationErrors({});
+
     if (invoice) {
       setFormData({
         customer_name: invoice.customer_name,
@@ -98,10 +116,21 @@ export function InvoiceDialog({ open, onOpenChange, invoice }: InvoiceDialogProp
     setItems(newItems);
   };
 
+  // ============================================================================
+  // Helper: Get error message for a field
+  // ============================================================================
+  const getFieldError = (fieldName: string) => {
+    return validationErrors[fieldName];
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setValidationErrors({}); // Clear previous errors
 
+    // ============================================================================
+    // STEP 1: Prepare invoice data
+    // ============================================================================
     const invoiceData = {
       customer_name: formData.customer_name,
       customer_email: formData.customer_email || undefined,
@@ -114,6 +143,26 @@ export function InvoiceDialog({ open, onOpenChange, invoice }: InvoiceDialogProp
       notes: formData.notes || undefined,
     };
 
+    // ============================================================================
+    // STEP 2: Client-side validation with Zod
+    // ============================================================================
+    // Validate BEFORE sending to server
+    // This gives immediate feedback to the user
+    const validation = invoice
+      ? validateUpdateInvoice({ id: invoice.id, ...invoiceData })
+      : validateCreateInvoice(invoiceData);
+
+    if (!validation.success) {
+      // Show validation errors to the user
+      const errors = formatZodErrors(validation.error);
+      setValidationErrors(errors);
+      setIsSubmitting(false);
+      return; // Stop here, don't submit to server
+    }
+
+    // ============================================================================
+    // STEP 3: Submit to server
+    // ============================================================================
     let result;
     if (invoice) {
       result = await updateInvoice({ id: invoice.id, ...invoiceData });
@@ -121,11 +170,21 @@ export function InvoiceDialog({ open, onOpenChange, invoice }: InvoiceDialogProp
       result = await createInvoice(invoiceData);
     }
 
+    // ============================================================================
+    // STEP 4: Handle result
+    // ============================================================================
     if (result.success) {
+      // Success! Close dialog and refresh
       onOpenChange(false);
       router.refresh();
     } else {
-      alert('Failed to save invoice: ' + result.error);
+      // Server-side validation failed or database error
+      // Display errors from server
+      if (result.validationErrors) {
+        setValidationErrors(result.validationErrors);
+      } else {
+        alert('Failed to save invoice: ' + result.error);
+      }
     }
 
     setIsSubmitting(false);
@@ -152,7 +211,14 @@ export function InvoiceDialog({ open, onOpenChange, invoice }: InvoiceDialogProp
                   setFormData({ ...formData, customer_name: e.target.value })
                 }
                 required
+                className={getFieldError('customer_name') ? 'border-red-500' : ''}
               />
+              {getFieldError('customer_name') && (
+                <p className="text-sm text-red-600 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {getFieldError('customer_name')}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -164,7 +230,14 @@ export function InvoiceDialog({ open, onOpenChange, invoice }: InvoiceDialogProp
                 onChange={(e) =>
                   setFormData({ ...formData, customer_email: e.target.value })
                 }
+                className={getFieldError('customer_email') ? 'border-red-500' : ''}
               />
+              {getFieldError('customer_email') && (
+                <p className="text-sm text-red-600 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {getFieldError('customer_email')}
+                </p>
+              )}
             </div>
           </div>
 
@@ -179,7 +252,14 @@ export function InvoiceDialog({ open, onOpenChange, invoice }: InvoiceDialogProp
                   setFormData({ ...formData, issue_date: e.target.value })
                 }
                 required
+                className={getFieldError('issue_date') ? 'border-red-500' : ''}
               />
+              {getFieldError('issue_date') && (
+                <p className="text-sm text-red-600 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {getFieldError('issue_date')}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -192,7 +272,14 @@ export function InvoiceDialog({ open, onOpenChange, invoice }: InvoiceDialogProp
                   setFormData({ ...formData, due_date: e.target.value })
                 }
                 required
+                className={getFieldError('due_date') ? 'border-red-500' : ''}
               />
+              {getFieldError('due_date') && (
+                <p className="text-sm text-red-600 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {getFieldError('due_date')}
+                </p>
+              )}
             </div>
           </div>
 
@@ -247,6 +334,12 @@ export function InvoiceDialog({ open, onOpenChange, invoice }: InvoiceDialogProp
                 </div>
               ))}
             </div>
+            {getFieldError('items') && (
+              <p className="text-sm text-red-600 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {getFieldError('items')}
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -303,7 +396,14 @@ export function InvoiceDialog({ open, onOpenChange, invoice }: InvoiceDialogProp
               min="0"
               required
               readOnly
+              className={getFieldError('amount') ? 'border-red-500' : ''}
             />
+            {getFieldError('amount') && (
+              <p className="text-sm text-red-600 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {getFieldError('amount')}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
