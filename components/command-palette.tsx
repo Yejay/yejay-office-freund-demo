@@ -187,12 +187,12 @@ export function CommandPalette({
   return (
     <div
       id="hs-pro-dnsm"
-      className="hs-overlay hs-overlay-backdrop-open:backdrop-blur-md hidden size-full fixed top-0 start-0 z-[80] overflow-x-hidden overflow-y-auto pointer-events-none"
+      className="hs-overlay hs-overlay-backdrop-open:backdrop-blur-md hidden size-full fixed top-0 start-0 z-[999] overflow-x-hidden overflow-y-auto pointer-events-none"
       role="dialog"
       tabIndex={-1}
       aria-label="Command Palette"
     >
-      <div className="hs-overlay-open:opacity-100 hs-overlay-open:duration-500 opacity-0 ease-out transition-all sm:max-w-lg sm:w-full m-3 sm:mx-auto h-[calc(100%-56px)] min-h-[calc(100%-56px)] flex items-center">
+      <div className="hs-overlay-open:opacity-100 hs-overlay-open:duration-500 ease-out transition-all sm:max-w-lg sm:w-full m-3 sm:mx-auto h-[calc(100%-56px)] min-h-[calc(100%-56px)] flex items-center">
         <div className="max-h-full relative w-full flex flex-col bg-white rounded-xl pointer-events-auto shadow-xl dark:bg-neutral-800">
 
           {/* Input */}
