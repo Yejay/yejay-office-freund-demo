@@ -41,6 +41,7 @@ interface InvoiceDialogProps {
 export function InvoiceDialog({ open, onOpenChange, invoice }: InvoiceDialogProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [autoCalcAmount, setAutoCalcAmount] = useState(true);
 
   // ============================================================================
   // Validation Errors State
@@ -80,6 +81,7 @@ export function InvoiceDialog({ open, onOpenChange, invoice }: InvoiceDialogProp
         notes: invoice.notes || '',
       });
       setItems(invoice.items.length > 0 ? invoice.items : [{ name: '', quantity: 1, price: 0 }]);
+      setAutoCalcAmount(true);
     } else {
       // Reset form for new invoice
       setFormData({
@@ -93,14 +95,16 @@ export function InvoiceDialog({ open, onOpenChange, invoice }: InvoiceDialogProp
         notes: '',
       });
       setItems([{ name: '', quantity: 1, price: 0 }]);
+      setAutoCalcAmount(true);
     }
   }, [invoice, open]);
 
   // Calculate total from items
   useEffect(() => {
+    if (!autoCalcAmount) return;
     const total = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
     setFormData((prev) => ({ ...prev, amount: total.toFixed(2) }));
-  }, [items]);
+  }, [items, autoCalcAmount]);
 
   const addItem = () => {
     setItems([...items, { name: '', quantity: 1, price: 0 }]);
@@ -391,11 +395,13 @@ export function InvoiceDialog({ open, onOpenChange, invoice }: InvoiceDialogProp
               id="amount"
               type="number"
               value={formData.amount}
-              onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+              onChange={(e) => {
+                setFormData({ ...formData, amount: e.target.value });
+                setAutoCalcAmount(false);
+              }}
               step="0.01"
               min="0"
               required
-              readOnly
               className={getFieldError('amount') ? 'border-red-500' : ''}
             />
             {getFieldError('amount') && (

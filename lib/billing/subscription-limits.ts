@@ -23,7 +23,7 @@ export const PLANS: Record<string, SubscriptionPlan> = {
   free: {
     id: 'free',
     name: 'Free',
-    invoiceLimit: 10,
+    invoiceLimit: 20,
     features: ['basic_templates', 'email_support'],
   },
   pro: {
