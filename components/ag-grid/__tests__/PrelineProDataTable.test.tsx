@@ -138,9 +138,9 @@ describe('PrelineProDataTable', () => {
       const tableContainer = container.querySelector('.preline-pro-table');
       expect(tableContainer).toBeInTheDocument();
 
-      // Should have responsive class
-      const responsiveContainer = container.querySelector('.preline-table-responsive');
-      expect(responsiveContainer).toBeInTheDocument();
+      // Should have AG Grid theme class
+      const agGridContainer = container.querySelector('.ag-theme-quartz');
+      expect(agGridContainer).toBeInTheDocument();
     });
   });
 
@@ -247,8 +247,8 @@ describe('PrelineProDataTable', () => {
       const filterButton = screen.getByRole('button', { name: /filter/i });
       await user.click(filterButton);
 
-      // Filter dropdown should be visible
-      expect(screen.getByRole('menu')).toBeInTheDocument();
+      // Filter dropdown should be visible (now shows columns)
+      expect(screen.getByText(/visible columns/i)).toBeInTheDocument();
     });
 
     it('should display filter dropdown content', async () => {
@@ -265,8 +265,8 @@ describe('PrelineProDataTable', () => {
       const filterButton = screen.getByRole('button', { name: /filter/i });
       await user.click(filterButton);
 
-      // Should show filter dropdown text
-      expect(screen.getByText(/filter by status/i)).toBeInTheDocument();
+      // Should show filter dropdown text (now shows column visibility controls)
+      expect(screen.getByText(/visible columns/i)).toBeInTheDocument();
     });
 
     it('should apply Preline Pro dropdown styling', async () => {
@@ -642,8 +642,13 @@ describe('PrelineProDataTable', () => {
         />
       );
 
-      const responsiveContainer = container.querySelector('.preline-table-responsive');
-      expect(responsiveContainer).toBeInTheDocument();
+      // Check for main preline-pro-table container with responsive flex layout
+      const tableContainer = container.querySelector('.preline-pro-table');
+      expect(tableContainer).toBeInTheDocument();
+
+      // Verify the table has proper responsive card styling
+      const cardContainer = container.querySelector('.rounded-xl');
+      expect(cardContainer).toBeInTheDocument();
     });
   });
 });

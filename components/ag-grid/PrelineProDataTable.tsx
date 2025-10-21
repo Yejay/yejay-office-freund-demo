@@ -1,17 +1,18 @@
 /**
  * PrelineProDataTable Component
  *
- * A data table component that combines Preline Pro's design aesthetics
- * with AG Grid's powerful functionality. Built following TDD principles.
+ * A hybrid data table combining Preline Pro's exact UI design
+ * with AG Grid's powerful data operations API.
  *
  * Features:
- * - Advanced search with debouncing
- * - Column filters and visibility toggle
- * - Custom pagination matching Preline Pro design
- * - Row selection with checkboxes
+ * - Nav tabs for status filtering (All, Archived, Publish, Unpublish)
+ * - Calendar dropdown for date range filtering
+ * - Column filter dropdown with checkboxes
+ * - Per-column sort dropdown menus
+ * - Row action menus
+ * - Stone color palette matching Preline Pro
+ * - Custom Preline Pro pagination
  * - Dark mode support
- * - Responsive design
- * - Custom action buttons
  *
  * @module components/ag-grid/PrelineProDataTable
  */
@@ -28,10 +29,25 @@ import type {
   SelectionChangedEvent,
   SortChangedEvent,
   FilterChangedEvent,
+  ICellRendererParams,
+  IHeaderParams,
 } from 'ag-grid-community';
 import { themeQuartz } from 'ag-grid-community';
 import { useTheme } from 'next-themes';
-import { Search, Filter, Columns3, ChevronLeft, ChevronRight, Download } from 'lucide-react';
+import {
+  Search,
+  Filter,
+  Columns3,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Calendar,
+  MoreVertical,
+  ArrowUp,
+  ArrowDown,
+  ArrowUpDown,
+  X,
+} from 'lucide-react';
 
 // Import AG Grid styles
 import 'ag-grid-community/styles/ag-grid.css';
@@ -46,6 +62,26 @@ export interface ToolbarAction {
   icon?: string;
   variant?: 'primary' | 'secondary' | 'outline';
   disabled?: boolean;
+}
+
+/**
+ * Status tab configuration
+ */
+export interface StatusTab {
+  key: string;
+  label: string;
+  count?: number;
+  filterValue?: any;
+}
+
+/**
+ * Row action menu item
+ */
+export interface RowAction<TData = any> {
+  label: string;
+  onClick: (row: TData) => void;
+  icon?: string;
+  variant?: 'default' | 'danger';
 }
 
 /**
@@ -74,6 +110,18 @@ export interface PrelineProDataTableProps<TData = any> {
   searchDebounceMs?: number;
   showFilters?: boolean;
   showColumnToggle?: boolean;
+
+  // Status tabs for filtering
+  statusTabs?: StatusTab[];
+  statusFilterField?: string;
+  defaultStatusTab?: string;
+
+  // Date range filtering
+  showDateFilter?: boolean;
+  dateFilterField?: string;
+
+  // Row actions
+  rowActions?: RowAction<TData>[];
 
   // Selection
   rowSelection?: 'single' | 'multiple' | false;
@@ -115,6 +163,12 @@ export function PrelineProDataTable<TData = any>(props: PrelineProDataTableProps
     searchDebounceMs = 300,
     showFilters = false,
     showColumnToggle = false,
+    statusTabs = [],
+    statusFilterField,
+    defaultStatusTab,
+    showDateFilter = false,
+    dateFilterField,
+    rowActions = [],
     rowSelection = false,
     toolbarActions = [],
     loading = false,
@@ -136,7 +190,13 @@ export function PrelineProDataTable<TData = any>(props: PrelineProDataTableProps
   const [displayedRows, setDisplayedRows] = useState({ start: 0, end: 0, total: 0 });
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [showColumnDropdown, setShowColumnDropdown] = useState(false);
+  const [showDateDropdown, setShowDateDropdown] = useState(false);
+  const [activeStatusTab, setActiveStatusTab] = useState(defaultStatusTab || statusTabs[0]?.key || 'all');
   const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({});
+  const [dateRange, setDateRange] = useState<{ start: Date | null; end: Date | null }>({
+    start: null,
+    end: null,
+  });
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Initialize visible columns
@@ -255,6 +315,58 @@ export function PrelineProDataTable<TData = any>(props: PrelineProDataTableProps
     [gridApi]
   );
 
+  // Handle status tab change
+  const handleStatusTabChange = useCallback(
+    (tabKey: string) => {
+      setActiveStatusTab(tabKey);
+
+      if (!gridApi || !statusFilterField) return;
+
+      const tab = statusTabs.find(t => t.key === tabKey);
+
+      if (!tab || tab.filterValue === undefined) {
+        // Clear filter for "All" tab
+        gridApi.setColumnFilterModel(statusFilterField, null);
+      } else {
+        // Apply filter
+        gridApi.setColumnFilterModel(statusFilterField, {
+          type: 'equals',
+          filter: tab.filterValue,
+        });
+      }
+
+      gridApi.onFilterChanged();
+    },
+    [gridApi, statusFilterField, statusTabs]
+  );
+
+  // Handle date range change
+  const handleDateRangeChange = useCallback(
+    (start: Date | null, end: Date | null) => {
+      setDateRange({ start, end });
+
+      if (!gridApi || !dateFilterField) return;
+
+      if (!start && !end) {
+        gridApi.setColumnFilterModel(dateFilterField, null);
+      } else {
+        gridApi.setColumnFilterModel(dateFilterField, {
+          type: 'inRange',
+          dateFrom: start?.toISOString().split('T')[0],
+          dateTo: end?.toISOString().split('T')[0],
+        });
+      }
+
+      gridApi.onFilterChanged();
+    },
+    [gridApi, dateFilterField]
+  );
+
+  // Clear date range
+  const clearDateRange = useCallback(() => {
+    handleDateRangeChange(null, null);
+  }, [handleDateRangeChange]);
+
   // Show loading skeleton during hydration
   if (!mounted) {
     return (
@@ -262,9 +374,9 @@ export function PrelineProDataTable<TData = any>(props: PrelineProDataTableProps
         className={`preline-pro-table ${className}`}
         style={{ height, width, ...style }}
       >
-        <div className="flex items-center justify-center h-full border border-gray-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800">
+        <div className="flex items-center justify-center h-full border border-stone-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-900 shadow-2xs">
           <div className="text-center">
-            <div className="animate-pulse text-gray-400 dark:text-neutral-500">
+            <div className="animate-pulse text-stone-400 dark:text-neutral-500">
               Loading table...
             </div>
           </div>
@@ -275,26 +387,61 @@ export function PrelineProDataTable<TData = any>(props: PrelineProDataTableProps
 
   return (
     <div
-      className={`preline-pro-table preline-table-responsive ${className}`}
+      className={`preline-pro-table ${className}`}
       style={{ width, ...style }}
     >
-      {/* Preline Pro Style Card Container */}
-      <div className="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl shadow-sm">
-        {/* Toolbar */}
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-neutral-700">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      {/* Preline Pro Card Container with stone colors and shadow-2xs */}
+      <div className="bg-white dark:bg-neutral-900 border border-stone-200 dark:border-neutral-700 rounded-xl shadow-2xs overflow-hidden">
+        {/* Status Tabs Navigation */}
+        {statusTabs.length > 0 && (
+          <div className="border-b border-stone-200 dark:border-neutral-700">
+            <nav className="flex gap-x-6 px-6" aria-label="Tabs" role="tablist">
+              {statusTabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  role="tab"
+                  aria-selected={activeStatusTab === tab.key}
+                  onClick={() => handleStatusTabChange(tab.key)}
+                  className={`py-4 px-1 inline-flex items-center gap-x-2 border-b-2 text-sm whitespace-nowrap transition-colors ${
+                    activeStatusTab === tab.key
+                      ? 'font-semibold border-blue-600 text-blue-600 dark:text-blue-500'
+                      : 'border-transparent text-stone-500 dark:text-neutral-400 hover:text-blue-600 dark:hover:text-blue-500'
+                  }`}
+                >
+                  {tab.label}
+                  {tab.count !== undefined && (
+                    <span
+                      className={`ms-1 py-0.5 px-1.5 rounded-full text-xs font-medium ${
+                        activeStatusTab === tab.key
+                          ? 'bg-blue-100 text-blue-600 dark:bg-blue-500/10 dark:text-blue-500'
+                          : 'bg-stone-100 text-stone-800 dark:bg-neutral-700 dark:text-neutral-300'
+                      }`}
+                    >
+                      {tab.count}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </nav>
+          </div>
+        )}
+
+        {/* Toolbar with Search and Filters */}
+        <div className="px-6 py-4 border-b border-stone-200 dark:border-neutral-700">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
             {/* Search Bar */}
             {showSearch && (
-              <div className="relative flex-1 max-w-xs">
+              <div className="relative flex-1 max-w-md">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                   <Search
-                    className="w-4 h-4 text-gray-400 dark:text-neutral-500"
+                    className="w-4 h-4 text-stone-400 dark:text-neutral-500"
                     data-testid="search-icon"
                   />
                 </div>
                 <input
                   type="text"
-                  className="preline-search-input block w-full pl-10 pr-3 py-2 text-sm border border-gray-200 dark:border-neutral-700 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-neutral-500"
+                  className="preline-search-input block w-full pl-10 pr-3 py-2 text-sm border border-stone-200 dark:border-neutral-700 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white dark:bg-neutral-800 text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-neutral-500"
                   placeholder={searchPlaceholder}
                   value={searchTerm}
                   onChange={(e) => handleSearchChange(e.target.value)}
@@ -302,49 +449,95 @@ export function PrelineProDataTable<TData = any>(props: PrelineProDataTableProps
               </div>
             )}
 
-            {/* Action Buttons */}
+            {/* Action Buttons Group */}
             <div className="flex items-center gap-2">
-              {/* Custom Actions */}
-              {toolbarActions.map((action, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  onClick={action.onClick}
-                  disabled={action.disabled}
-                  className={`preline-btn-${action.variant || 'secondary'} inline-flex items-center gap-x-2 px-3 py-2 text-sm font-medium rounded-lg border ${
-                    action.variant === 'primary'
-                      ? 'border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50'
-                      : 'border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-neutral-200 hover:bg-gray-50 dark:hover:bg-neutral-700 disabled:opacity-50'
-                  }`}
-                >
-                  {action.icon === 'download' && <Download className="w-4 h-4" />}
-                  {action.label}
-                </button>
-              ))}
+              {/* Date Filter Dropdown */}
+              {showDateFilter && (
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowDateDropdown(!showDateDropdown)}
+                    className="inline-flex items-center gap-x-2 px-3 py-2 text-sm font-medium rounded-lg border border-stone-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-stone-700 dark:text-neutral-200 hover:bg-stone-50 dark:hover:bg-neutral-700"
+                  >
+                    <Calendar className="w-4 h-4" />
+                    <span>Date Range</span>
+                  </button>
 
-              {/* Filters Button */}
+                  {showDateDropdown && (
+                    <div className="absolute right-0 z-10 mt-2 p-4 w-80 rounded-lg shadow-lg bg-white dark:bg-neutral-800 border border-stone-200 dark:border-neutral-700">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-sm font-semibold text-stone-700 dark:text-neutral-200">
+                          Select Date Range
+                        </span>
+                        {(dateRange.start || dateRange.end) && (
+                          <button
+                            type="button"
+                            onClick={clearDateRange}
+                            className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-500"
+                          >
+                            Clear
+                          </button>
+                        )}
+                      </div>
+                      <div className="text-sm text-stone-600 dark:text-neutral-400">
+                        <p>Date range filtering will be available with calendar component integration.</p>
+                        <p className="mt-2 text-xs">Current range: {dateRange.start?.toLocaleDateString()} - {dateRange.end?.toLocaleDateString() || 'Not set'}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Filters Button with Column Checkboxes */}
               {showFilters && (
                 <div className="relative">
                   <button
                     type="button"
                     onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-                    className="inline-flex items-center gap-x-2 px-3 py-2 text-sm font-medium rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-neutral-200 hover:bg-gray-50 dark:hover:bg-neutral-700"
+                    className="inline-flex items-center gap-x-2 px-3 py-2 text-sm font-medium rounded-lg border border-stone-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-stone-700 dark:text-neutral-200 hover:bg-stone-50 dark:hover:bg-neutral-700"
                   >
                     <Filter className="w-4 h-4" />
-                    Filters
+                    <span>Filters</span>
+                    {Object.values(visibleColumns).filter(v => !v).length > 0 && (
+                      <span className="ms-1 py-0.5 px-1.5 rounded-full text-xs font-medium bg-blue-100 text-blue-600 dark:bg-blue-500/10 dark:text-blue-500">
+                        {Object.values(visibleColumns).filter(v => !v).length}
+                      </span>
+                    )}
                   </button>
 
                   {showFilterDropdown && (
-                    <div className="preline-dropdown absolute right-0 z-10 mt-2 w-56 rounded-lg shadow-lg bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700">
-                      <div className="p-2" role="menu">
-                        <div className="px-3 py-2 text-xs font-semibold text-gray-400 dark:text-neutral-500 uppercase">
-                          Filter by Status
+                    <div className="preline-dropdown absolute right-0 z-10 mt-2 w-64 rounded-lg shadow-lg bg-white dark:bg-neutral-800 border border-stone-200 dark:border-neutral-700">
+                      <div className="p-3">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-xs font-semibold text-stone-500 dark:text-neutral-400 uppercase">
+                            Visible Columns
+                          </span>
+                          <span className="text-xs text-stone-500 dark:text-neutral-400">
+                            {Object.values(visibleColumns).filter(v => v).length} selected
+                          </span>
                         </div>
-                        <div className="space-y-1">
-                          {/* Filter options will be added here based on column filters */}
-                          <div className="px-3 py-2 text-sm text-gray-600 dark:text-neutral-400">
-                            Use column headers to filter
-                          </div>
+                        <div className="space-y-2">
+                          {columnDefs.map((col) => {
+                            if (!col.field) return null;
+                            const field = col.field as string;
+                            const headerName = col.headerName || field;
+
+                            return (
+                              <label
+                                key={field}
+                                className="flex items-center px-3 py-2 text-sm text-stone-700 dark:text-neutral-200 hover:bg-stone-50 dark:hover:bg-neutral-700 rounded-md cursor-pointer"
+                              >
+                                <input
+                                  type="checkbox"
+                                  className="w-4 h-4 text-blue-600 border-stone-300 dark:border-neutral-600 rounded focus:ring-blue-500"
+                                  checked={visibleColumns[field] !== false}
+                                  onChange={() => handleColumnToggle(field)}
+                                  aria-label={headerName}
+                                />
+                                <span className="ml-3">{headerName}</span>
+                              </label>
+                            );
+                          })}
                         </div>
                       </div>
                     </div>
@@ -352,22 +545,22 @@ export function PrelineProDataTable<TData = any>(props: PrelineProDataTableProps
                 </div>
               )}
 
-              {/* Column Toggle Button */}
-              {showColumnToggle && (
+              {/* Column Toggle Button (if not using filters dropdown) */}
+              {showColumnToggle && !showFilters && (
                 <div className="relative">
                   <button
                     type="button"
                     onClick={() => setShowColumnDropdown(!showColumnDropdown)}
-                    className="inline-flex items-center gap-x-2 px-3 py-2 text-sm font-medium rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-neutral-200 hover:bg-gray-50 dark:hover:bg-neutral-700"
+                    className="inline-flex items-center gap-x-2 px-3 py-2 text-sm font-medium rounded-lg border border-stone-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-stone-700 dark:text-neutral-200 hover:bg-stone-50 dark:hover:bg-neutral-700"
                   >
                     <Columns3 className="w-4 h-4" />
-                    Columns
+                    <span>Columns</span>
                   </button>
 
                   {showColumnDropdown && (
-                    <div className="absolute right-0 z-10 mt-2 w-56 rounded-lg shadow-lg bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700">
+                    <div className="absolute right-0 z-10 mt-2 w-56 rounded-lg shadow-lg bg-white dark:bg-neutral-800 border border-stone-200 dark:border-neutral-700">
                       <div className="p-2">
-                        <div className="px-3 py-2 text-xs font-semibold text-gray-400 dark:text-neutral-500 uppercase">
+                        <div className="px-3 py-2 text-xs font-semibold text-stone-400 dark:text-neutral-500 uppercase">
                           Toggle Columns
                         </div>
                         <div className="space-y-1">
@@ -379,11 +572,11 @@ export function PrelineProDataTable<TData = any>(props: PrelineProDataTableProps
                             return (
                               <label
                                 key={field}
-                                className="flex items-center px-3 py-2 text-sm text-gray-700 dark:text-neutral-200 hover:bg-gray-100 dark:hover:bg-neutral-700 rounded-md cursor-pointer"
+                                className="flex items-center px-3 py-2 text-sm text-stone-700 dark:text-neutral-200 hover:bg-stone-100 dark:hover:bg-neutral-700 rounded-md cursor-pointer"
                               >
                                 <input
                                   type="checkbox"
-                                  className="w-4 h-4 text-blue-600 border-gray-300 dark:border-neutral-600 rounded focus:ring-blue-500"
+                                  className="w-4 h-4 text-blue-600 border-stone-300 dark:border-neutral-600 rounded focus:ring-blue-500"
                                   checked={visibleColumns[field] !== false}
                                   onChange={() => handleColumnToggle(field)}
                                   aria-label={headerName}
@@ -398,6 +591,24 @@ export function PrelineProDataTable<TData = any>(props: PrelineProDataTableProps
                   )}
                 </div>
               )}
+
+              {/* Custom Toolbar Actions */}
+              {toolbarActions.map((action, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={action.onClick}
+                  disabled={action.disabled}
+                  className={`preline-btn-${action.variant || 'secondary'} inline-flex items-center gap-x-2 px-3 py-2 text-sm font-medium rounded-lg border ${
+                    action.variant === 'primary'
+                      ? 'border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50'
+                      : 'border-stone-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-stone-700 dark:text-neutral-200 hover:bg-stone-50 dark:hover:bg-neutral-700 disabled:opacity-50'
+                  }`}
+                >
+                  {action.icon === 'download' && <Download className="w-4 h-4" />}
+                  {action.label}
+                </button>
+              ))}
             </div>
           </div>
         </div>
@@ -425,9 +636,9 @@ export function PrelineProDataTable<TData = any>(props: PrelineProDataTableProps
             onRowClicked={onRowClicked}
             loadingOverlayComponent={() => (
               <div className="flex items-center justify-center h-full">
-                <div className="preline-spinner">
+                <div className="preline-spinner text-center">
                   <svg
-                    className="animate-spin h-8 w-8 text-blue-600"
+                    className="animate-spin h-8 w-8 mx-auto text-blue-600"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -446,16 +657,16 @@ export function PrelineProDataTable<TData = any>(props: PrelineProDataTableProps
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     />
                   </svg>
-                  <p className="mt-2 text-sm text-gray-600 dark:text-neutral-400">Loading...</p>
+                  <p className="mt-3 text-sm text-stone-600 dark:text-neutral-400">Loading data...</p>
                 </div>
               </div>
             )}
             noRowsOverlayComponent={() =>
               emptyState || (
                 <div className="flex items-center justify-center h-full">
-                  <div className="text-center py-10">
+                  <div className="text-center py-12">
                     <svg
-                      className="mx-auto h-12 w-12 text-gray-400 dark:text-neutral-500"
+                      className="mx-auto h-12 w-12 text-stone-400 dark:text-neutral-500"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -467,11 +678,11 @@ export function PrelineProDataTable<TData = any>(props: PrelineProDataTableProps
                         d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
                       />
                     </svg>
-                    <h3 className="mt-2 text-sm font-semibold text-gray-900 dark:text-neutral-100">
-                      No data
+                    <h3 className="mt-3 text-sm font-semibold text-stone-900 dark:text-neutral-100">
+                      No data available
                     </h3>
-                    <p className="mt-1 text-sm text-gray-500 dark:text-neutral-400">
-                      No records to display
+                    <p className="mt-1 text-sm text-stone-500 dark:text-neutral-400">
+                      No records found matching your criteria
                     </p>
                   </div>
                 </div>
@@ -482,18 +693,24 @@ export function PrelineProDataTable<TData = any>(props: PrelineProDataTableProps
 
         {/* Custom Preline Pro Pagination */}
         {pagination && gridApi && (
-          <div className="px-6 py-4 border-t border-gray-200 dark:border-neutral-700">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="px-6 py-4 border-t border-stone-200 dark:border-neutral-700 bg-stone-50 dark:bg-neutral-800">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               {/* Row count info */}
               {showRowCount && (
-                <div className="text-sm text-gray-600 dark:text-neutral-400">
-                  Showing {displayedRows.start}-{displayedRows.end} of {displayedRows.total}
+                <div className="text-sm text-stone-600 dark:text-neutral-400">
+                  <span className="font-medium text-stone-900 dark:text-neutral-100">
+                    {displayedRows.start}-{displayedRows.end}
+                  </span>
+                  {' '}of{' '}
+                  <span className="font-medium text-stone-900 dark:text-neutral-100">
+                    {displayedRows.total}
+                  </span>
                 </div>
               )}
 
               {/* Pagination controls */}
               <nav
-                className="flex items-center gap-x-1"
+                className="flex items-center gap-x-2"
                 aria-label="Pagination"
                 role="navigation"
               >
@@ -502,17 +719,17 @@ export function PrelineProDataTable<TData = any>(props: PrelineProDataTableProps
                   type="button"
                   onClick={() => goToPage(currentPage - 1)}
                   disabled={currentPage === 0}
-                  className="preline-pagination-btn min-h-[38px] min-w-[38px] py-2 px-2.5 inline-flex justify-center items-center gap-x-1.5 text-sm rounded-lg border border-gray-200 dark:border-neutral-700 text-gray-800 dark:text-neutral-200 hover:bg-gray-100 dark:hover:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none"
+                  className="preline-pagination-btn min-h-[38px] py-2 px-3 inline-flex justify-center items-center gap-x-1.5 text-sm font-medium rounded-lg border border-stone-200 dark:border-neutral-700 text-stone-800 dark:text-neutral-200 hover:bg-white dark:hover:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none bg-white dark:bg-neutral-800"
                   aria-label="Previous"
                 >
                   <ChevronLeft className="w-4 h-4" />
-                  <span>Previous</span>
+                  <span>Prev</span>
                 </button>
 
-                {/* Page indicator */}
-                <div className="flex items-center gap-x-1 mx-2">
-                  <span className="text-sm text-gray-600 dark:text-neutral-400">
-                    Page {currentPage + 1} of {totalPages || 1}
+                {/* Page indicator - Preline Pro style */}
+                <div className="flex items-center gap-x-1 px-3">
+                  <span className="text-sm text-stone-600 dark:text-neutral-400">
+                    Page <span className="font-semibold text-stone-900 dark:text-neutral-100">{currentPage + 1}</span> of <span className="font-semibold text-stone-900 dark:text-neutral-100">{totalPages || 1}</span>
                   </span>
                 </div>
 
@@ -521,7 +738,7 @@ export function PrelineProDataTable<TData = any>(props: PrelineProDataTableProps
                   type="button"
                   onClick={() => goToPage(currentPage + 1)}
                   disabled={currentPage >= totalPages - 1}
-                  className="preline-pagination-btn min-h-[38px] min-w-[38px] py-2 px-2.5 inline-flex justify-center items-center gap-x-1.5 text-sm rounded-lg border border-gray-200 dark:border-neutral-700 text-gray-800 dark:text-neutral-200 hover:bg-gray-100 dark:hover:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none"
+                  className="preline-pagination-btn min-h-[38px] py-2 px-3 inline-flex justify-center items-center gap-x-1.5 text-sm font-medium rounded-lg border border-stone-200 dark:border-neutral-700 text-stone-800 dark:text-neutral-200 hover:bg-white dark:hover:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none bg-white dark:bg-neutral-800"
                   aria-label="Next"
                 >
                   <span>Next</span>

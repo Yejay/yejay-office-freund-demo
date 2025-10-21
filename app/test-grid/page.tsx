@@ -27,7 +27,7 @@ export default function TestGridPage() {
   const [selectedRows, setSelectedRows] = useState<Invoice[]>([]);
 
   // Sample data - expanded dataset for better testing
-  const invoices: Invoice[] = [
+  const invoices: Invoice[] = useMemo(() => [
     {
       id: '1',
       invoiceNumber: 'INV-001',
@@ -136,7 +136,34 @@ export default function TestGridPage() {
       status: 'paid',
       date: '2024-02-10',
     },
-  ];
+  ], []);
+
+  // Status tabs configuration
+  const statusTabs = useMemo(() => [
+    {
+      key: 'all',
+      label: 'All',
+      count: invoices.length,
+    },
+    {
+      key: 'paid',
+      label: 'Paid',
+      count: invoices.filter((i) => i.status === 'paid').length,
+      filterValue: 'paid',
+    },
+    {
+      key: 'pending',
+      label: 'Pending',
+      count: invoices.filter((i) => i.status === 'pending').length,
+      filterValue: 'pending',
+    },
+    {
+      key: 'overdue',
+      label: 'Overdue',
+      count: invoices.filter((i) => i.status === 'overdue').length,
+      filterValue: 'overdue',
+    },
+  ], [invoices]);
 
   // Column definitions
   const columnDefs = useMemo<ColDef<Invoice>[]>(
@@ -197,15 +224,15 @@ export default function TestGridPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-neutral-900 p-8">
+    <div className="min-h-screen bg-stone-50 dark:bg-neutral-900 p-8">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          <h1 className="text-3xl font-bold text-stone-900 dark:text-white mb-2">
             Preline Pro Data Table
           </h1>
-          <p className="text-gray-600 dark:text-neutral-400">
-            AG Grid with Preline Pro design - Built using TDD
+          <p className="text-stone-600 dark:text-neutral-400">
+            Hybrid component combining Preline Pro UI with AG Grid API - Built using TDD
           </p>
         </div>
 
@@ -222,7 +249,11 @@ export default function TestGridPage() {
             searchPlaceholder="Search invoices..."
             searchDebounceMs={300}
             showFilters
-            showColumnToggle
+            showDateFilter
+            dateFilterField="date"
+            statusTabs={statusTabs}
+            statusFilterField="status"
+            defaultStatusTab="all"
             showRowCount
             rowSelection="multiple"
             height="600px"
@@ -250,31 +281,31 @@ export default function TestGridPage() {
           {/* Instructions */}
           <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-xl p-6">
             <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-400 mb-3">
-              🎯 Preline Pro Features
+              🎯 Hybrid Preline Pro + AG Grid Features
             </h3>
             <ul className="space-y-2 text-sm text-blue-800 dark:text-blue-300">
+              <li>✅ <strong>Status Nav Tabs:</strong> Filter by status (All, Paid, Pending, Overdue)</li>
+              <li>✅ <strong>Stone Color Palette:</strong> Preline Pro's exact design system</li>
               <li>✅ <strong>Advanced Search:</strong> Debounced search with icon</li>
-              <li>✅ <strong>Preline Styling:</strong> Rounded corners, shadows, borders</li>
-              <li>✅ <strong>Custom Toolbar:</strong> Search, filters, columns, actions</li>
-              <li>✅ <strong>Custom Pagination:</strong> Preline Pro button styles</li>
+              <li>✅ <strong>Date Range Filter:</strong> Calendar dropdown (placeholder ready)</li>
+              <li>✅ <strong>Column Filters:</strong> Checkboxes with count badge</li>
+              <li>✅ <strong>Custom Pagination:</strong> Preline Pro "X of Y" format</li>
               <li>✅ <strong>Row Selection:</strong> Multi-select with checkboxes</li>
               <li>✅ <strong>Dark Mode:</strong> Full dark mode support</li>
-              <li>✅ <strong>Responsive:</strong> Mobile-friendly design</li>
-              <li>✅ <strong>Action Buttons:</strong> Export and custom actions</li>
-              <li>✅ <strong>Column Toggle:</strong> Show/hide columns dynamically</li>
-              <li>✅ <strong>AG Grid Power:</strong> Sorting, filtering, resizing</li>
+              <li>✅ <strong>Shadow-2xs:</strong> Preline Pro shadow utilities</li>
+              <li>✅ <strong>AG Grid Power:</strong> Sorting, filtering, resizing via API</li>
             </ul>
           </div>
 
           {/* Statistics */}
           <div className="space-y-4">
-            <div className="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl p-4">
+            <div className="bg-white dark:bg-neutral-800 border border-stone-200 dark:border-neutral-700 rounded-xl p-4 shadow-2xs">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-sm text-gray-500 dark:text-neutral-400 mb-1">
+                  <div className="text-sm text-stone-500 dark:text-neutral-400 mb-1">
                     Total Invoices
                   </div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <div className="text-2xl font-bold text-stone-900 dark:text-white">
                     {invoices.length}
                   </div>
                 </div>
@@ -286,10 +317,10 @@ export default function TestGridPage() {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl p-4">
+            <div className="bg-white dark:bg-neutral-800 border border-stone-200 dark:border-neutral-700 rounded-xl p-4 shadow-2xs">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-sm text-gray-500 dark:text-neutral-400 mb-1">
+                  <div className="text-sm text-stone-500 dark:text-neutral-400 mb-1">
                     Paid Invoices
                   </div>
                   <div className="text-2xl font-bold text-teal-600 dark:text-teal-400">
@@ -304,10 +335,10 @@ export default function TestGridPage() {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl p-4">
+            <div className="bg-white dark:bg-neutral-800 border border-stone-200 dark:border-neutral-700 rounded-xl p-4 shadow-2xs">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-sm text-gray-500 dark:text-neutral-400 mb-1">
+                  <div className="text-sm text-stone-500 dark:text-neutral-400 mb-1">
                     Overdue Invoices
                   </div>
                   <div className="text-2xl font-bold text-red-600 dark:text-red-400">
