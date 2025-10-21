@@ -27,6 +27,12 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 221 83% 53%;
     --radius: 0.5rem;
+
+    /* AG Grid Preline Theme - Light Mode */
+    --ag-preline-bg: theme('colors.white');
+    --ag-preline-fg: theme('colors.gray.900');
+    --ag-preline-accent: theme('colors.blue.500');
+    --ag-preline-font: theme('fontFamily.sans');
   }
 
   .dark {
@@ -50,6 +56,11 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 224.3 76.3% 48%;
+
+    /* AG Grid Preline Theme - Dark Mode */
+    --ag-preline-bg: theme('colors.neutral.900');
+    --ag-preline-fg: theme('colors.neutral.100');
+    --ag-preline-accent: theme('colors.blue.400');
   }
 }
 
@@ -59,5 +70,131 @@
   }
   body {
     @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+@layer utilities {
+  /* AG Grid Preline Integration - CSS Variable Overrides */
+
+  /* Light Mode Overrides */
+  .ag-theme-quartz {
+    --ag-header-background-color: theme('colors.gray.50');
+    --ag-header-foreground-color: theme('colors.gray.700');
+    --ag-header-column-separator-color: theme('colors.gray.200');
+    --ag-row-border-color: theme('colors.gray.200');
+    --ag-border-color: theme('colors.gray.200');
+    --ag-row-hover-color: theme('colors.gray.100');
+    --ag-selected-row-background-color: theme('colors.blue.50');
+    --ag-modal-overlay-background-color: rgba(0, 0, 0, 0.4);
+  }
+
+  /* Dark Mode Overrides */
+  .dark .ag-theme-quartz {
+    --ag-header-background-color: theme('colors.neutral.800');
+    --ag-header-foreground-color: theme('colors.neutral.200');
+    --ag-header-column-separator-color: theme('colors.neutral.700');
+    --ag-row-border-color: theme('colors.neutral.700');
+    --ag-border-color: theme('colors.neutral.700');
+    --ag-row-hover-color: theme('colors.neutral.700');
+    --ag-selected-row-background-color: theme('colors.neutral.800');
+    --ag-modal-overlay-background-color: rgba(0, 0, 0, 0.66);
+  }
+
+  /* Sort Icon Customization */
+  .ag-theme-quartz .ag-sort-ascending-icon,
+  .ag-theme-quartz .ag-sort-descending-icon {
+    color: theme('colors.blue.500');
+    opacity: 1;
+  }
+
+  .dark .ag-theme-quartz .ag-sort-ascending-icon,
+  .dark .ag-theme-quartz .ag-sort-descending-icon {
+    color: theme('colors.blue.400');
+  }
+
+  .ag-theme-quartz .ag-sort-none-icon {
+    color: theme('colors.gray.400');
+    opacity: 0.5;
+  }
+
+  .dark .ag-theme-quartz .ag-sort-none-icon {
+    color: theme('colors.neutral.500');
+  }
+
+  /* Row Grouping Customization */
+  .ag-theme-quartz .ag-row-group {
+    font-weight: 600;
+    color: theme('colors.gray.800');
+  }
+
+  .dark .ag-theme-quartz .ag-row-group {
+    color: theme('colors.neutral.200');
+  }
+
+  .ag-theme-quartz .ag-group-expanded,
+  .ag-theme-quartz .ag-group-contracted {
+    color: theme('colors.blue.500');
+  }
+
+  .dark .ag-theme-quartz .ag-group-expanded,
+  .dark .ag-theme-quartz .ag-group-contracted {
+    color: theme('colors.blue.400');
+  }
+
+  /* Group Row Background */
+  .ag-theme-quartz .ag-row-group-leaf-indent {
+    background-color: theme('colors.gray.50');
+  }
+
+  .dark .ag-theme-quartz .ag-row-group-leaf-indent {
+    background-color: theme('colors.neutral.800/50');
+  }
+
+  /* Inline Editing Customization */
+  .ag-theme-quartz .ag-cell-inline-editing {
+    background-color: theme('colors.blue.50');
+    border: 1px solid theme('colors.blue.500');
+    border-radius: theme('borderRadius.DEFAULT');
+  }
+
+  .dark .ag-theme-quartz .ag-cell-inline-editing {
+    background-color: theme('colors.blue.500/10');
+    border-color: theme('colors.blue.400');
+  }
+
+  .ag-theme-quartz .ag-cell-inline-editing input {
+    padding: theme('spacing.2');
+    font-size: theme('fontSize.sm');
+    color: theme('colors.gray.900');
+    background-color: transparent;
+  }
+
+  .dark .ag-theme-quartz .ag-cell-inline-editing input {
+    color: theme('colors.neutral.100');
+  }
+
+  /* Column Drag and Drop Visual Feedback */
+  .ag-theme-quartz .ag-column-drop {
+    background-color: theme('colors.gray.100');
+    border: 2px dashed theme('colors.gray.300');
+  }
+
+  .dark .ag-theme-quartz .ag-column-drop {
+    background-color: theme('colors.neutral.800');
+    border-color: theme('colors.neutral-600');
+  }
+
+  .ag-theme-quartz .ag-column-moving {
+    opacity: 0.5;
+  }
+
+  /* Column Resize Handle */
+  .ag-theme-quartz .ag-header-cell-resize::after {
+    background-color: theme('colors.blue.500');
+    width: 2px;
+  }
+
+  .dark .ag-theme-quartz .ag-header-cell-resize::after {
+    background-color: theme('colors.blue.400');
   }
 }
