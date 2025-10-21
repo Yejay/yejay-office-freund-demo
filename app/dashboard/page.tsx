@@ -6,10 +6,11 @@ import { Invoice } from '@/lib/types/invoice';
 import { InvoiceTableAgGrid } from '@/components/invoices/invoice-table-ag-grid';
 import { InvoiceDialog } from '@/components/invoices/invoice-dialog';
 import { Button } from '@/components/ui/button';
-import { Plus, FileText, DollarSign, Clock, AlertCircle } from 'lucide-react';
+import { Plus, FileText, DollarSign, Clock, AlertCircle, Home, CreditCard, Table2, Grid3x3 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getInvoices } from '@/app/actions/invoices';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -98,6 +99,44 @@ export default function DashboardPage() {
           New Invoice
         </Button>
       </div>
+
+      {/* Navigation Links */}
+      <Card className="shadow-sm">
+        <CardContent className="pt-6">
+          <div className="flex flex-wrap gap-3">
+            <Link href="/">
+              <Button variant="outline" className="gap-2">
+                <Home className="h-4 w-4" />
+                Home
+              </Button>
+            </Link>
+            <Link href="/dashboard">
+              <Button variant="outline" className="gap-2 bg-primary/10">
+                <FileText className="h-4 w-4" />
+                Dashboard
+              </Button>
+            </Link>
+            <Link href="/billing">
+              <Button variant="outline" className="gap-2">
+                <CreditCard className="h-4 w-4" />
+                Billing
+              </Button>
+            </Link>
+            <Link href="/examples/ag-grid">
+              <Button variant="outline" className="gap-2">
+                <Grid3x3 className="h-4 w-4" />
+                AG Grid Example
+              </Button>
+            </Link>
+            <Link href="/test-grid">
+              <Button variant="outline" className="gap-2">
+                <Table2 className="h-4 w-4" />
+                Test Grid
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Stats Cards */}
       {!isLoading && (
