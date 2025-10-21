@@ -1,14 +1,14 @@
 /**
  * AG Grid Test Page
  *
- * Simple test page to demo the AG Grid + Preline integration.
+ * Demo page for PrelineProDataTable - AG Grid with Preline Pro design.
  * Access at: http://localhost:3000/test-grid
  */
 
 'use client';
 
-import React, { useMemo } from 'react';
-import { DataGrid } from '@/components/ag-grid/DataGrid';
+import React, { useMemo, useState } from 'react';
+import { PrelineProDataTable } from '@/components/ag-grid/PrelineProDataTable';
 import { GridErrorBoundary } from '@/components/ag-grid/GridErrorBoundary';
 import { StatusBadge } from '@/components/ag-grid/renderers/StatusBadge';
 import type { ColDef } from 'ag-grid-community';
@@ -24,7 +24,9 @@ interface Invoice {
 }
 
 export default function TestGridPage() {
-  // Sample data
+  const [selectedRows, setSelectedRows] = useState<Invoice[]>([]);
+
+  // Sample data - expanded dataset for better testing
   const invoices: Invoice[] = [
     {
       id: '1',
@@ -98,6 +100,42 @@ export default function TestGridPage() {
       status: 'pending',
       date: '2024-01-28',
     },
+    {
+      id: '9',
+      invoiceNumber: 'INV-009',
+      customer: 'Cloud Services Ltd',
+      email: 'billing@cloudservices.com',
+      amount: 5500.00,
+      status: 'paid',
+      date: '2024-02-01',
+    },
+    {
+      id: '10',
+      invoiceNumber: 'INV-010',
+      customer: 'Data Analytics Co',
+      email: 'finance@dataanalytics.com',
+      amount: 2750.00,
+      status: 'pending',
+      date: '2024-02-05',
+    },
+    {
+      id: '11',
+      invoiceNumber: 'INV-011',
+      customer: 'Security Solutions',
+      email: 'accounts@security.com',
+      amount: 1950.00,
+      status: 'overdue',
+      date: '2024-01-05',
+    },
+    {
+      id: '12',
+      invoiceNumber: 'INV-012',
+      customer: 'Mobile Apps Inc',
+      email: 'billing@mobileapps.io',
+      amount: 3850.00,
+      status: 'paid',
+      date: '2024-02-10',
+    },
   ];
 
   // Column definitions
@@ -152,85 +190,167 @@ export default function TestGridPage() {
     []
   );
 
+  // Handle export action
+  const handleExport = () => {
+    console.log('Exporting data...', selectedRows);
+    alert(`Exporting ${selectedRows.length || invoices.length} invoices`);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-neutral-900 p-8">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            AG Grid + Preline Test
+            Preline Pro Data Table
           </h1>
           <p className="text-gray-600 dark:text-neutral-400">
-            Testing the AG Grid component with Preline design system integration
+            AG Grid with Preline Pro design - Built using TDD
           </p>
         </div>
 
-        {/* Grid Card */}
-        <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm">
-          <GridErrorBoundary>
-            <DataGrid<Invoice>
-              gridId="test-grid"
-              rowData={invoices}
-              columnDefs={columnDefs}
-              pagination
-              paginationPageSize={10}
-              showSearch
-              searchPlaceholder="Search invoices..."
-              showFilters
-              showColumnToggle
-              rowSelection="multiple"
-              height="600px"
-              animateRows
-              onRowClicked={(event) => {
-                console.log('Row clicked:', event.data);
-              }}
-            />
-          </GridErrorBoundary>
+        {/* PrelineProDataTable Component */}
+        <GridErrorBoundary>
+          <PrelineProDataTable<Invoice>
+            gridId="preline-pro-grid"
+            rowData={invoices}
+            columnDefs={columnDefs}
+            pagination
+            paginationPageSize={5}
+            paginationPageSizeOptions={[5, 10, 25, 50]}
+            showSearch
+            searchPlaceholder="Search invoices..."
+            searchDebounceMs={300}
+            showFilters
+            showColumnToggle
+            showRowCount
+            rowSelection="multiple"
+            height="600px"
+            toolbarActions={[
+              {
+                label: 'Export',
+                onClick: handleExport,
+                icon: 'download',
+                variant: 'primary',
+              },
+            ]}
+            onSelectionChanged={(event) => {
+              const selected = event.api.getSelectedRows();
+              setSelectedRows(selected);
+              console.log('Selected rows:', selected);
+            }}
+            onRowClicked={(event) => {
+              console.log('Row clicked:', event.data);
+            }}
+          />
+        </GridErrorBoundary>
+
+        {/* Feature Showcase */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Instructions */}
+          <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-xl p-6">
+            <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-400 mb-3">
+              🎯 Preline Pro Features
+            </h3>
+            <ul className="space-y-2 text-sm text-blue-800 dark:text-blue-300">
+              <li>✅ <strong>Advanced Search:</strong> Debounced search with icon</li>
+              <li>✅ <strong>Preline Styling:</strong> Rounded corners, shadows, borders</li>
+              <li>✅ <strong>Custom Toolbar:</strong> Search, filters, columns, actions</li>
+              <li>✅ <strong>Custom Pagination:</strong> Preline Pro button styles</li>
+              <li>✅ <strong>Row Selection:</strong> Multi-select with checkboxes</li>
+              <li>✅ <strong>Dark Mode:</strong> Full dark mode support</li>
+              <li>✅ <strong>Responsive:</strong> Mobile-friendly design</li>
+              <li>✅ <strong>Action Buttons:</strong> Export and custom actions</li>
+              <li>✅ <strong>Column Toggle:</strong> Show/hide columns dynamically</li>
+              <li>✅ <strong>AG Grid Power:</strong> Sorting, filtering, resizing</li>
+            </ul>
+          </div>
+
+          {/* Statistics */}
+          <div className="space-y-4">
+            <div className="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm text-gray-500 dark:text-neutral-400 mb-1">
+                    Total Invoices
+                  </div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {invoices.length}
+                  </div>
+                </div>
+                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-500/10 rounded-lg flex items-center justify-center">
+                  <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm text-gray-500 dark:text-neutral-400 mb-1">
+                    Paid Invoices
+                  </div>
+                  <div className="text-2xl font-bold text-teal-600 dark:text-teal-400">
+                    {invoices.filter((i) => i.status === 'paid').length}
+                  </div>
+                </div>
+                <div className="w-12 h-12 bg-teal-100 dark:bg-teal-500/10 rounded-lg flex items-center justify-center">
+                  <svg className="w-6 h-6 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm text-gray-500 dark:text-neutral-400 mb-1">
+                    Overdue Invoices
+                  </div>
+                  <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                    {invoices.filter((i) => i.status === 'overdue').length}
+                  </div>
+                </div>
+                <div className="w-12 h-12 bg-red-100 dark:bg-red-500/10 rounded-lg flex items-center justify-center">
+                  <svg className="w-6 h-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            {selectedRows.length > 0 && (
+              <div className="bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-xl p-4">
+                <div className="text-sm text-green-600 dark:text-green-400 font-semibold mb-1">
+                  Selected Rows
+                </div>
+                <div className="text-2xl font-bold text-green-700 dark:text-green-300">
+                  {selectedRows.length}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Instructions */}
-        <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-400 mb-3">
-            🎯 Test Features
-          </h3>
-          <ul className="space-y-2 text-sm text-blue-800 dark:text-blue-300">
-            <li>✅ <strong>Search:</strong> Type in the search bar to filter rows</li>
-            <li>✅ <strong>Filters:</strong> Click the Filters button to apply column filters</li>
-            <li>✅ <strong>Columns:</strong> Click Columns to hide/show columns</li>
-            <li>✅ <strong>Sort:</strong> Click column headers to sort</li>
-            <li>✅ <strong>Pagination:</strong> Use pagination controls at the bottom</li>
-            <li>✅ <strong>Selection:</strong> Check checkboxes to select rows</li>
-            <li>✅ <strong>Resize:</strong> Drag column edges to resize</li>
-            <li>✅ <strong>Reorder:</strong> Drag column headers to reorder</li>
-            <li>✅ <strong>Dark Mode:</strong> Toggle your system dark mode to see themes</li>
-            <li>✅ <strong>Persistence:</strong> Your settings are saved to localStorage</li>
-          </ul>
-        </div>
-
-        {/* Status Info */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-lg p-4">
-            <div className="text-sm text-gray-500 dark:text-neutral-400 mb-1">
-              Total Invoices
+        {/* TDD Badge */}
+        <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-500/10 dark:to-pink-500/10 border border-purple-200 dark:border-purple-500/20 rounded-xl p-6">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-500/20 rounded-lg flex items-center justify-center">
+              <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
             </div>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">
-              {invoices.length}
-            </div>
-          </div>
-          <div className="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-lg p-4">
-            <div className="text-sm text-gray-500 dark:text-neutral-400 mb-1">
-              Paid
-            </div>
-            <div className="text-2xl font-bold text-teal-600 dark:text-teal-400">
-              {invoices.filter((i) => i.status === 'paid').length}
-            </div>
-          </div>
-          <div className="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-lg p-4">
-            <div className="text-sm text-gray-500 dark:text-neutral-400 mb-1">
-              Overdue
-            </div>
-            <div className="text-2xl font-bold text-red-600 dark:text-red-400">
-              {invoices.filter((i) => i.status === 'overdue').length}
+            <div>
+              <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-300">
+                Built with Test-Driven Development
+              </h3>
+              <p className="text-sm text-purple-700 dark:text-purple-400 mt-1">
+                This component was developed using TDD methodology. Tests were written first,
+                then the component was built to pass all tests. Run <code className="px-1.5 py-0.5 bg-purple-100 dark:bg-purple-500/20 rounded">npm test</code> to verify.
+              </p>
             </div>
           </div>
         </div>
