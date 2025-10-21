@@ -53,6 +53,9 @@ import {
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
 
+// Import custom Preline Pro table styling
+import './preline-pro-table.css';
+
 /**
  * Action button configuration for toolbar
  */
@@ -218,12 +221,14 @@ export function PrelineProDataTable<TData = any>(props: PrelineProDataTableProps
   // Determine theme mode
   const dataThemeMode = theme === 'dark' ? 'dark' : 'light';
 
-  // Default column definition
+  // Default column definition with Preline Pro styling
   const effectiveDefaultColDef = useMemo<ColDef<TData>>(() => {
     return {
       sortable: true,
       filter: true,
       resizable: true,
+      flex: 1,
+      minWidth: 100,
       ...defaultColDef,
     };
   }, [defaultColDef]);
@@ -391,7 +396,7 @@ export function PrelineProDataTable<TData = any>(props: PrelineProDataTableProps
       style={{ width, ...style }}
     >
       {/* Preline Pro Card Container with stone colors and shadow-2xs */}
-      <div className="bg-white dark:bg-neutral-900 border border-stone-200 dark:border-neutral-700 rounded-xl shadow-2xs overflow-hidden">
+      <div className="bg-white dark:bg-neutral-900 border border-stone-200 dark:border-neutral-700 rounded-xl shadow-2xs">
         {/* Status Tabs Navigation */}
         {statusTabs.length > 0 && (
           <div className="border-b border-stone-200 dark:border-neutral-700">

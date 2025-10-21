@@ -1,0 +1,274 @@
+/**
+ * Preline Pro Table Styling for AG Grid
+ * Overrides AG Grid's default theme to match Preline Pro design
+ */
+
+/* Remove AG Grid's default borders and backgrounds */
+.preline-pro-table .ag-theme-quartz {
+  --ag-border-color: transparent;
+  --ag-header-background-color: transparent;
+  --ag-row-border-color: rgb(231 229 228 / 1); /* stone-200 */
+  --ag-background-color: transparent;
+  --ag-odd-row-background-color: transparent;
+  --ag-header-foreground-color: rgb(68 64 60 / 1); /* stone-700 */
+  --ag-foreground-color: rgb(41 37 36 / 1); /* stone-800 */
+  --ag-border-radius: 0;
+  --ag-font-size: 14px;
+}
+
+/* Dark mode colors */
+.preline-pro-table .ag-theme-quartz[data-ag-theme-mode="dark"] {
+  --ag-row-border-color: rgb(64 64 64 / 1); /* neutral-700 */
+  --ag-header-foreground-color: rgb(212 212 212 / 1); /* neutral-300 */
+  --ag-foreground-color: rgb(229 229 229 / 1); /* neutral-200 */
+}
+
+/* Header styling - Preline Pro style */
+.preline-pro-table .ag-header {
+  border-bottom: 1px solid rgb(231 229 228 / 1); /* stone-200 */
+  background: rgb(250 250 249 / 1); /* stone-50 */
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  color: rgb(87 83 78 / 1); /* stone-600 */
+}
+
+.preline-pro-table .ag-theme-quartz[data-ag-theme-mode="dark"] .ag-header {
+  border-bottom-color: rgb(64 64 64 / 1); /* neutral-700 */
+  background: rgb(38 38 38 / 1); /* neutral-800 */
+  color: rgb(163 163 163 / 1); /* neutral-400 */
+}
+
+/* Header cells */
+.preline-pro-table .ag-header-cell {
+  padding: 14px 16px;
+  border-right: none;
+}
+
+.preline-pro-table .ag-header-cell:first-child {
+  padding-left: 20px;
+}
+
+.preline-pro-table .ag-header-cell-label {
+  justify-content: flex-start;
+}
+
+/* Remove AG Grid's default header separators */
+.preline-pro-table .ag-header-cell::after {
+  display: none;
+}
+
+/* Header checkbox */
+.preline-pro-table .ag-header-cell .ag-checkbox-input-wrapper {
+  margin-right: 8px;
+}
+
+/* Row styling - Preline Pro style */
+.preline-pro-table .ag-row {
+  border-bottom: 1px solid rgb(231 229 228 / 1); /* stone-200 */
+  background: white;
+  transition: background-color 150ms ease;
+}
+
+.preline-pro-table .ag-theme-quartz[data-ag-theme-mode="dark"] .ag-row {
+  border-bottom-color: rgb(64 64 64 / 1); /* neutral-700 */
+  background: rgb(23 23 23 / 1); /* neutral-900 */
+}
+
+/* Remove border from last row */
+.preline-pro-table .ag-row:last-child {
+  border-bottom: none;
+}
+
+/* Row hover effect - Preline Pro style */
+.preline-pro-table .ag-row:hover {
+  background: rgb(250 250 249 / 1); /* stone-50 */
+}
+
+.preline-pro-table .ag-theme-quartz[data-ag-theme-mode="dark"] .ag-row:hover {
+  background: rgb(38 38 38 / 1); /* neutral-800 */
+}
+
+/* Cell styling */
+.preline-pro-table .ag-cell {
+  padding: 16px;
+  border-right: none;
+  line-height: 1.5;
+  font-size: 14px;
+  color: rgb(68 64 60 / 1); /* stone-700 */
+  font-weight: 400;
+}
+
+.preline-pro-table .ag-theme-quartz[data-ag-theme-mode="dark"] .ag-cell {
+  color: rgb(229 229 229 / 1); /* neutral-200 */
+}
+
+/* First column (with checkbox) gets less padding on left */
+.preline-pro-table .ag-cell:first-child {
+  padding-left: 20px;
+}
+
+/* Make cells with font-semibold class bolder */
+.preline-pro-table .ag-cell.font-semibold {
+  font-weight: 600;
+  color: rgb(28 25 23 / 1); /* stone-900 */
+}
+
+.preline-pro-table .ag-theme-quartz[data-ag-theme-mode="dark"] .ag-cell.font-semibold {
+  color: rgb(250 250 250 / 1); /* neutral-50 */
+}
+
+/* Remove cell focus outline, use subtle border instead */
+.preline-pro-table .ag-cell-focus,
+.preline-pro-table .ag-cell-focus:focus {
+  outline: none;
+  border: 1px solid rgb(191 219 254 / 1) !important; /* blue-200 */
+}
+
+/* Checkbox styling - Preline Pro style */
+.preline-pro-table .ag-checkbox-input-wrapper {
+  width: 16px;
+  height: 16px;
+}
+
+.preline-pro-table .ag-checkbox-input-wrapper input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  border-radius: 0.25rem;
+  border: 1px solid rgb(214 211 209 / 1); /* stone-300 */
+  cursor: pointer;
+}
+
+.preline-pro-table .ag-checkbox-input-wrapper input[type="checkbox"]:checked {
+  background-color: rgb(37 99 235 / 1); /* blue-600 */
+  border-color: rgb(37 99 235 / 1);
+}
+
+/* Sort indicator - Preline Pro style */
+.preline-pro-table .ag-sort-indicator-icon {
+  color: rgb(37 99 235 / 1); /* blue-600 */
+}
+
+.preline-pro-table .ag-theme-quartz[data-ag-theme-mode="dark"] .ag-sort-indicator-icon {
+  color: rgb(96 165 250 / 1); /* blue-400 */
+}
+
+/* Filter icon - Preline Pro style */
+.preline-pro-table .ag-header-cell-filter-button {
+  color: rgb(120 113 108 / 1); /* stone-500 */
+}
+
+.preline-pro-table .ag-header-cell-filter-button:hover {
+  color: rgb(37 99 235 / 1); /* blue-600 */
+}
+
+/* Loading overlay - Preline Pro style */
+.preline-pro-table .ag-overlay-loading-wrapper {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.preline-pro-table .ag-theme-quartz[data-ag-theme-mode="dark"] .ag-overlay-loading-wrapper {
+  background: rgba(23, 23, 23, 0.9);
+}
+
+/* Remove AG Grid's default shadows and borders */
+.preline-pro-table .ag-root-wrapper {
+  border: none;
+  border-radius: 0;
+}
+
+.preline-pro-table .ag-body-viewport {
+  overflow-x: auto !important;
+}
+
+/* Scrollbar styling - Preline Pro style */
+.preline-pro-table .ag-body-horizontal-scroll-viewport::-webkit-scrollbar,
+.preline-pro-table .ag-body-viewport::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.preline-pro-table .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-track,
+.preline-pro-table .ag-body-viewport::-webkit-scrollbar-track {
+  background: rgb(245 245 244 / 1); /* stone-100 */
+}
+
+.preline-pro-table .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-thumb,
+.preline-pro-table .ag-body-viewport::-webkit-scrollbar-thumb {
+  background: rgb(214 211 209 / 1); /* stone-300 */
+  border-radius: 4px;
+}
+
+.preline-pro-table .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-thumb:hover,
+.preline-pro-table .ag-body-viewport::-webkit-scrollbar-thumb:hover {
+  background: rgb(168 162 158 / 1); /* stone-400 */
+}
+
+/* Dark mode scrollbar */
+.preline-pro-table .ag-theme-quartz[data-ag-theme-mode="dark"] .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-track,
+.preline-pro-table .ag-theme-quartz[data-ag-theme-mode="dark"] .ag-body-viewport::-webkit-scrollbar-track {
+  background: rgb(38 38 38 / 1); /* neutral-800 */
+}
+
+.preline-pro-table .ag-theme-quartz[data-ag-theme-mode="dark"] .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-thumb,
+.preline-pro-table .ag-theme-quartz[data-ag-theme-mode="dark"] .ag-body-viewport::-webkit-scrollbar-thumb {
+  background: rgb(64 64 64 / 1); /* neutral-700 */
+}
+
+/* Pinned columns - maintain styling */
+.preline-pro-table .ag-pinned-left-header,
+.preline-pro-table .ag-pinned-left-cols-container {
+  border-right: 1px solid rgb(231 229 228 / 1); /* stone-200 */
+}
+
+.preline-pro-table .ag-theme-quartz[data-ag-theme-mode="dark"] .ag-pinned-left-header,
+.preline-pro-table .ag-theme-quartz[data-ag-theme-mode="dark"] .ag-pinned-left-cols-container {
+  border-right-color: rgb(64 64 64 / 1); /* neutral-700 */
+}
+
+/* Selected row styling - Preline Pro style */
+.preline-pro-table .ag-row-selected {
+  background-color: rgb(239 246 255 / 1) !important; /* blue-50 */
+}
+
+.preline-pro-table .ag-theme-quartz[data-ag-theme-mode="dark"] .ag-row-selected {
+  background-color: rgb(30 58 138 / 0.2) !important; /* blue-900 with opacity */
+}
+
+.preline-pro-table .ag-row-selected:hover {
+  background-color: rgb(219 234 254 / 1) !important; /* blue-100 */
+}
+
+.preline-pro-table .ag-theme-quartz[data-ag-theme-mode="dark"] .ag-row-selected:hover {
+  background-color: rgb(30 58 138 / 0.3) !important;
+}
+
+/* Text alignment utilities */
+.preline-pro-table .ag-cell.text-right {
+  justify-content: flex-end;
+}
+
+.preline-pro-table .ag-cell.text-center {
+  justify-content: center;
+}
+
+/* Menu and dropdown styling - Preline Pro */
+.preline-pro-table .ag-menu {
+  background: white;
+  border: 1px solid rgb(231 229 228 / 1); /* stone-200 */
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.preline-pro-table .ag-theme-quartz[data-ag-theme-mode="dark"] .ag-menu {
+  background: rgb(38 38 38 / 1); /* neutral-800 */
+  border-color: rgb(64 64 64 / 1); /* neutral-700 */
+}
+
+/* Remove all default AG Grid borders from the root */
+.preline-pro-table .ag-root,
+.preline-pro-table .ag-header-viewport,
+.preline-pro-table .ag-body-viewport {
+  border: none !important;
+}
