@@ -41,10 +41,6 @@
 
 import { useState, useEffect } from 'react';
 import { useOrganization } from '@clerk/nextjs';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Check, Zap, Crown, Building2, ArrowRight } from 'lucide-react';
 import { getInvoices } from '@/app/actions/invoices';
 
@@ -183,33 +179,38 @@ export default function BillingPage() {
       </div>
 
       {/* Current Usage Card */}
-      <Card className="shadow-sm">
-        <CardHeader>
+      <div className="bg-white border border-gray-200 rounded-xl shadow-sm dark:bg-neutral-800 dark:border-neutral-700">
+        <div className="p-5 border-b border-gray-200 dark:border-neutral-700">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Current Usage</CardTitle>
-              <CardDescription>
+              <h3 className="text-lg font-bold text-gray-800 dark:text-white">Current Usage</h3>
+              <p className="text-sm text-gray-500 dark:text-neutral-400">
                 {organization?.name || 'Your organization'} - {currentPlanData.name} Plan
-              </CardDescription>
+              </p>
             </div>
-            <Badge variant="secondary" className="bg-blue-50 text-blue-700 border border-blue-200">
+            <span className="inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800">
               {currentPlanData.name}
-            </Badge>
+            </span>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
+        </div>
+        <div className="p-5 space-y-4">
           {isLoading ? (
-            <p className="text-muted-foreground">Loading usage data...</p>
+            <p className="text-gray-500 dark:text-neutral-400">Loading usage data...</p>
           ) : (
             <>
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium">Invoices this month</span>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-sm font-medium text-gray-700 dark:text-neutral-300">Invoices this month</span>
+                  <span className="text-sm text-gray-500 dark:text-neutral-400">
                     {invoiceCount} / {currentPlanData.invoiceLimit === Infinity ? '∞' : currentPlanData.invoiceLimit}
                   </span>
                 </div>
-                <Progress value={Math.min(usagePercentage, 100)} className="h-2" />
+                <div className="flex w-full h-2 bg-gray-200 rounded-full overflow-hidden dark:bg-neutral-700">
+                  <div
+                    className="flex flex-col justify-center rounded-full overflow-hidden bg-blue-600 text-xs text-white text-center whitespace-nowrap transition duration-500"
+                    style={{ width: `${Math.min(usagePercentage, 100)}%` }}
+                  ></div>
+                </div>
               </div>
 
               {usagePercentage >= 80 && usagePercentage < 100 && (
@@ -225,14 +226,14 @@ export default function BillingPage() {
               )}
             </>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Pricing Plans */}
       <div>
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold">Choose Your Plan</h2>
-          <p className="text-muted-foreground mt-2">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Choose Your Plan</h2>
+          <p className="text-gray-500 dark:text-neutral-400 mt-2">
             Select the perfect plan for your business needs
           </p>
         </div>
@@ -243,84 +244,88 @@ export default function BillingPage() {
             const isCurrentPlan = plan.id === currentPlan;
 
             return (
-              <Card
+              <div
                 key={plan.id}
-                className={`relative shadow-sm ${
+                className={`relative bg-white border rounded-xl shadow-sm dark:bg-neutral-800 dark:border-neutral-700 ${
                   plan.highlighted
                     ? 'border-purple-500 dark:border-purple-400 shadow-purple-100 dark:shadow-purple-900/20'
-                    : ''
+                    : 'border-gray-200'
                 }`}
               >
                 {plan.badge && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <Badge className="bg-purple-600 text-white">
+                    <span className="inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-full text-xs font-medium bg-purple-600 text-white">
                       {plan.badge}
-                    </Badge>
+                    </span>
                   </div>
                 )}
 
-                <CardHeader>
+                <div className="p-5">
                   <div className="flex items-center justify-between">
                     <Icon className={`h-8 w-8 ${plan.iconColor}`} />
                     {isCurrentPlan && (
-                      <Badge variant="secondary" className="bg-green-50 text-green-700 border border-green-200">
+                      <span className="inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800">
                         Active
-                      </Badge>
+                      </span>
                     )}
                   </div>
-                  <CardTitle className="mt-4">{plan.name}</CardTitle>
-                  <CardDescription>{plan.description}</CardDescription>
+                  <h3 className="mt-4 text-lg font-bold text-gray-800 dark:text-white">{plan.name}</h3>
+                  <p className="text-sm text-gray-500 dark:text-neutral-400">{plan.description}</p>
                   <div className="mt-4">
-                    <span className="text-4xl font-bold">{plan.price}</span>
+                    <span className="text-4xl font-bold text-gray-800 dark:text-white">{plan.price}</span>
                     {plan.period && (
-                      <span className="text-muted-foreground">{plan.period}</span>
+                      <span className="text-gray-500 dark:text-neutral-400">{plan.period}</span>
                     )}
                   </div>
-                </CardHeader>
+                </div>
 
-                <CardContent>
+                <div className="p-5 border-t border-gray-200 dark:border-neutral-700">
                   <ul className="space-y-3">
                     {plan.features.map((feature, index) => (
                       <li key={index} className="flex items-start gap-2">
                         <Check className="h-5 w-5 text-green-600 dark:text-green-400 shrink-0 mt-0.5" />
-                        <span className="text-sm">{feature}</span>
+                        <span className="text-sm text-gray-700 dark:text-neutral-300">{feature}</span>
                       </li>
                     ))}
                   </ul>
-                </CardContent>
+                </div>
 
-                <CardFooter>
-                  <Button
-                    className="w-full"
-                    variant={plan.highlighted ? 'default' : 'outline'}
+                <div className="p-5 border-t border-gray-200 dark:border-neutral-700">
+                  <button
+                    type="button"
+                    className={`w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border disabled:opacity-50 disabled:pointer-events-none ${
+                      plan.highlighted
+                        ? 'border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700'
+                        : 'border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700'
+                    }`}
                     disabled={isCurrentPlan}
                     onClick={() => handleUpgrade(plan.id)}
                   >
                     {isCurrentPlan ? plan.cta : (
                       <>
                         {plan.cta}
-                        <ArrowRight className="ml-2 h-4 w-4" />
+                        <ArrowRight className="h-4 w-4" />
                       </>
                     )}
-                  </Button>
-                </CardFooter>
-              </Card>
+                  </button>
+                </div>
+              </div>
             );
           })}
         </div>
       </div>
 
       {/* Setup Instructions */}
-      <Card className="shadow-sm bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800">
-        <CardHeader>
-          <CardTitle className="text-blue-900 dark:text-blue-100">
+      <div className="bg-blue-50 border border-blue-200 rounded-xl shadow-sm dark:bg-blue-900/10 dark:border-blue-800">
+        <div className="p-5 border-b border-blue-200 dark:border-blue-800">
+          <h3 className="text-lg font-bold text-blue-900 dark:text-blue-100">
             Setup Clerk Billing (Beta)
-          </CardTitle>
-          <CardDescription className="text-blue-700 dark:text-blue-300">
+          </h3>
+          <p className="text-sm text-blue-700 dark:text-blue-300">
             To enable real billing functionality, follow these steps:
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3 text-sm text-blue-900 dark:text-blue-100">
+          </p>
+        </div>
+        <div className="p-5 space-y-3 text-sm text-blue-900 dark:text-blue-100">
           <ol className="list-decimal list-inside space-y-2">
             <li>Go to your Clerk Dashboard → Billing Settings</li>
             <li>Connect your Stripe account (required for payments)</li>
@@ -332,8 +337,8 @@ export default function BillingPage() {
           <p className="mt-4 text-xs text-blue-700 dark:text-blue-400">
             <strong>Note:</strong> Clerk Billing is currently in Beta. APIs may change. Pin your SDK versions.
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

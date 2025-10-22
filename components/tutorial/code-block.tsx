@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "../ui/button";
+// import { Button } from "../ui/button"; // Removed - using native button
 
 const CopyIcon = () => (
   <svg
@@ -46,15 +46,13 @@ export function CodeBlock({ code }: { code: string }) {
   };
 
   return (
-    <pre className="bg-muted rounded-md p-6 my-6 relative">
-      <Button
-        size="icon"
+    <pre className="bg-gray-100 dark:bg-neutral-800 rounded-md p-6 my-6 relative">
+      <button
         onClick={copy}
-        variant={"outline"}
-        className="absolute right-2 top-2"
+        className="absolute right-2 top-2 py-2 px-2 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
       >
         {icon}
-      </Button>
+      </button>
       <code className="text-xs p-3">{code}</code>
     </pre>
   );

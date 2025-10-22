@@ -1,17 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { Invoice } from '@/lib/types/invoice';
 // Using AG Grid table instead of the basic table component
 import { InvoiceTableAgGrid } from '@/components/invoices/invoice-table-ag-grid';
 import { InvoiceDialog } from '@/components/invoices/invoice-dialog';
-import { Button } from '@/components/ui/button';
 import { Plus, FileText, DollarSign, Clock, AlertCircle } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getInvoices } from '@/app/actions/invoices';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function DashboardPage() {
+function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -88,90 +86,85 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Invoices</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-3xl font-bold tracking-tight text-gray-800 dark:text-neutral-200">Invoices</h1>
+          <p className="text-gray-500 dark:text-neutral-400 mt-1">
             Manage and track your invoices
           </p>
         </div>
-        <Button onClick={handleCreate} size="lg" className="shadow-sm">
-          <Plus className="mr-2 h-4 w-4" />
+        <button
+          onClick={handleCreate}
+          className="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none shadow-sm"
+        >
+          <Plus className="h-4 w-4" />
           New Invoice
-        </Button>
+        </button>
       </div>
 
       {/* Stats Cards */}
       {!isLoading && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Invoices</CardTitle>
+          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 dark:bg-neutral-800 dark:border-neutral-700">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium text-gray-500 dark:text-neutral-400">Total Invoices</h3>
               <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                 <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.total}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {formatCurrency(stats.totalAmount)} total value
-              </p>
-            </CardContent>
-          </Card>
+            </div>
+            <div className="text-2xl font-bold text-gray-800 dark:text-neutral-200">{stats.total}</div>
+            <p className="text-xs text-gray-500 dark:text-neutral-400 mt-1">
+              {formatCurrency(stats.totalAmount)} total value
+            </p>
+          </div>
 
-          <Card className="shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Paid</CardTitle>
+          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 dark:bg-neutral-800 dark:border-neutral-700">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium text-gray-500 dark:text-neutral-400">Paid</h3>
               <div className="p-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
                 <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" />
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                {formatCurrency(stats.paid)}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {invoices.filter((inv) => inv.status === 'paid').length} invoices
-              </p>
-            </CardContent>
-          </Card>
+            </div>
+            <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+              {formatCurrency(stats.paid)}
+            </div>
+            <p className="text-xs text-gray-500 dark:text-neutral-400 mt-1">
+              {invoices.filter((inv) => inv.status === 'paid').length} invoices
+            </p>
+          </div>
 
-          <Card className="shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Pending</CardTitle>
+          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 dark:bg-neutral-800 dark:border-neutral-700">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium text-gray-500 dark:text-neutral-400">Pending</h3>
               <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                 <Clock className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                {formatCurrency(stats.pending)}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {invoices.filter((inv) => inv.status === 'pending').length} invoices
-              </p>
-            </CardContent>
-          </Card>
+            </div>
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+              {formatCurrency(stats.pending)}
+            </div>
+            <p className="text-xs text-gray-500 dark:text-neutral-400 mt-1">
+              {invoices.filter((inv) => inv.status === 'pending').length} invoices
+            </p>
+          </div>
 
-          <Card className="shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Overdue</CardTitle>
+          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 dark:bg-neutral-800 dark:border-neutral-700">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium text-gray-500 dark:text-neutral-400">Overdue</h3>
               <div className="p-2 bg-red-50 dark:bg-red-900/20 rounded-lg">
                 <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600 dark:text-red-400">{stats.overdue}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Requires immediate attention
-              </p>
-            </CardContent>
-          </Card>
+            </div>
+            <div className="text-2xl font-bold text-red-600 dark:text-red-400">{stats.overdue}</div>
+            <p className="text-xs text-gray-500 dark:text-neutral-400 mt-1">
+              Requires immediate attention
+            </p>
+          </div>
         </div>
       )}
 
       {/* Invoice Table */}
       {isLoading ? (
         <div className="flex items-center justify-center p-8">
-          <div className="text-muted-foreground">Loading invoices...</div>
+          <div className="text-gray-500 dark:text-neutral-400">Loading invoices...</div>
         </div>
       ) : (
         <InvoiceTableAgGrid invoices={invoices} onEdit={handleEdit} />
@@ -184,5 +177,17 @@ export default function DashboardPage() {
         invoice={selectedInvoice}
       />
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-gray-500 dark:text-neutral-400">Loading...</div>
+      </div>
+    }>
+      <DashboardContent />
+    </Suspense>
   );
 }

@@ -27,17 +27,6 @@ import { AgGridReact } from 'ag-grid-react';
 import { ColDef, ModuleRegistry } from 'ag-grid-community';
 import { AllCommunityModule } from 'ag-grid-community';
 import { Invoice, InvoiceStatus } from '@/lib/types/invoice';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Search, MoreHorizontal, Edit, Copy, Trash2, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { deleteInvoice, duplicateInvoice } from '@/app/actions/invoices';
@@ -90,9 +79,9 @@ export function InvoiceTableAgGrid({ invoices, onEdit }: InvoiceTableAgGridProps
    */
   const StatusCellRenderer = (props: { value: InvoiceStatus }) => {
     return (
-      <Badge variant="secondary" className={statusColors[props.value]}>
+      <span className={`inline-flex items-center gap-x-1.5 py-1 px-2 rounded-full text-xs font-medium ${statusColors[props.value]}`}>
         {props.value.charAt(0).toUpperCase() + props.value.slice(1)}
-      </Badge>
+      </span>
     );
   };
 
@@ -162,33 +151,47 @@ export function InvoiceTableAgGrid({ invoices, onEdit }: InvoiceTableAgGridProps
     };
 
     return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            disabled={isDeleting === invoice.id}
-            onClick={(e) => e.stopPropagation()} // Prevent row selection
+      <div className="hs-dropdown relative inline-flex">
+        <button
+          type="button"
+          className="hs-dropdown-toggle py-2 px-2 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent text-gray-500 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+          disabled={isDeleting === invoice.id}
+          onClick={(e) => e.stopPropagation()}
+          data-hs-dropdown-auto-close="inside"
+        >
+          <MoreHorizontal className="h-4 w-4" />
+        </button>
+
+        <div className="hs-dropdown-menu transition-[opacity,margin] duration hs-dropdown-open:opacity-100 opacity-0 hidden min-w-60 bg-white shadow-md rounded-lg p-1 space-y-0.5 mt-2 dark:bg-neutral-800 dark:border dark:border-neutral-700 dark:divide-neutral-700 after:h-4 after:absolute after:-bottom-4 after:start-0 after:w-full before:h-4 before:absolute before:-top-4 before:start-0 before:w-full z-10"
+          role="menu"
+        >
+          <button
+            type="button"
+            onClick={() => onEdit(invoice)}
+            className="w-full flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300 dark:focus:bg-neutral-700"
           >
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => onEdit(invoice)}>
-            <Edit className="mr-2 h-4 w-4" />
+            <Edit className="h-4 w-4" />
             Edit
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleDuplicate}>
-            <Copy className="mr-2 h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={handleDuplicate}
+            className="w-full flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300 dark:focus:bg-neutral-700"
+          >
+            <Copy className="h-4 w-4" />
             Duplicate
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleDelete} className="text-red-600">
-            <Trash2 className="mr-2 h-4 w-4" />
+          </button>
+          <div className="border-t border-gray-200 my-1 dark:border-neutral-700"></div>
+          <button
+            type="button"
+            onClick={handleDelete}
+            className="w-full flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-red-600 hover:bg-red-50 focus:outline-none focus:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 dark:focus:bg-red-900/20"
+          >
+            <Trash2 className="h-4 w-4" />
             Delete
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+          </button>
+        </div>
+      </div>
     );
   };
 
@@ -334,32 +337,69 @@ export function InvoiceTableAgGrid({ invoices, onEdit }: InvoiceTableAgGridProps
       {/* Search and Filters */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-neutral-500" />
+          <input
+            type="text"
             placeholder="Search invoices..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
+            className="py-2 pl-9 pr-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
           />
         </div>
 
         <div className="flex items-center gap-2">
-          <Tabs
-            value={statusFilter}
-            onValueChange={(value) => setStatusFilter(value as typeof statusFilter)}
-          >
-            <TabsList>
-              <TabsTrigger value="all">All ({stats.all})</TabsTrigger>
-              <TabsTrigger value="paid">Paid ({stats.paid})</TabsTrigger>
-              <TabsTrigger value="pending">Pending ({stats.pending})</TabsTrigger>
-              <TabsTrigger value="overdue">Overdue ({stats.overdue})</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          {/* Preline Tabs */}
+          <nav className="flex gap-x-1 border border-gray-200 rounded-lg p-1 dark:border-neutral-700" role="tablist" aria-label="Tabs">
+            <button
+              type="button"
+              onClick={() => setStatusFilter('all')}
+              className={`hs-tab-active:bg-white hs-tab-active:text-gray-700 hs-tab-active:dark:bg-neutral-800 hs-tab-active:dark:text-neutral-400 py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium text-center rounded-lg hover:text-gray-700 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-400 dark:hover:text-neutral-300 ${
+                statusFilter === 'all' ? 'bg-white text-gray-700 dark:bg-neutral-800 dark:text-neutral-400' : 'text-gray-500'
+              }`}
+              role="tab"
+            >
+              All ({stats.all})
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter('paid')}
+              className={`hs-tab-active:bg-white hs-tab-active:text-gray-700 hs-tab-active:dark:bg-neutral-800 hs-tab-active:dark:text-neutral-400 py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium text-center rounded-lg hover:text-gray-700 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-400 dark:hover:text-neutral-300 ${
+                statusFilter === 'paid' ? 'bg-white text-gray-700 dark:bg-neutral-800 dark:text-neutral-400' : 'text-gray-500'
+              }`}
+              role="tab"
+            >
+              Paid ({stats.paid})
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter('pending')}
+              className={`hs-tab-active:bg-white hs-tab-active:text-gray-700 hs-tab-active:dark:bg-neutral-800 hs-tab-active:dark:text-neutral-400 py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium text-center rounded-lg hover:text-gray-700 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-400 dark:hover:text-neutral-300 ${
+                statusFilter === 'pending' ? 'bg-white text-gray-700 dark:bg-neutral-800 dark:text-neutral-400' : 'text-gray-500'
+              }`}
+              role="tab"
+            >
+              Pending ({stats.pending})
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter('overdue')}
+              className={`hs-tab-active:bg-white hs-tab-active:text-gray-700 hs-tab-active:dark:bg-neutral-800 hs-tab-active:dark:text-neutral-400 py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium text-center rounded-lg hover:text-gray-700 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-400 dark:hover:text-neutral-300 ${
+                statusFilter === 'overdue' ? 'bg-white text-gray-700 dark:bg-neutral-800 dark:text-neutral-400' : 'text-gray-500'
+              }`}
+              role="tab"
+            >
+              Overdue ({stats.overdue})
+            </button>
+          </nav>
 
-          <Button variant="outline" size="sm" onClick={handleExportCSV}>
-            <Download className="h-4 w-4 mr-2" />
+          <button
+            type="button"
+            onClick={handleExportCSV}
+            className="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+          >
+            <Download className="h-4 w-4" />
             Export CSV
-          </Button>
+          </button>
         </div>
       </div>
 
