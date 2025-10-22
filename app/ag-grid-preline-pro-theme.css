@@ -1,0 +1,351 @@
+/**
+ * AG Grid - Preline Pro Advanced Theme
+ *
+ * This theme matches the exact styling of Preline Pro's
+ * "Advanced with Searchable Filter Bar" component.
+ *
+ * Stone color palette from Preline Pro:
+ * - stone-50: #fafaf9
+ * - stone-100: #f5f5f4
+ * - stone-200: #e7e5e4
+ * - stone-300: #d6d3d1
+ * - stone-500: #78716c
+ * - stone-600: #57534e
+ * - stone-800: #292524
+ */
+
+/* ============================================================================
+   BASE CONTAINER OVERRIDES FOR PRELINE PRO
+   ============================================================================ */
+
+.ag-preline-pro.ag-theme-quartz {
+  /* Remove AG Grid's default container styling */
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  --ag-font-family: inherit;
+  --ag-font-size: 0.875rem; /* text-sm */
+}
+
+.ag-preline-pro.ag-theme-quartz-dark {
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  --ag-font-family: inherit;
+  --ag-font-size: 0.875rem;
+}
+
+/* ============================================================================
+   TABLE WRAPPER - Match Preline Pro's table structure
+   ============================================================================ */
+
+.ag-preline-pro .ag-root-wrapper {
+  border: 1px solid #e7e5e4 !important; /* border-stone-200 */
+  border-radius: 0 !important;
+  overflow: visible !important;
+}
+
+.ag-preline-pro.ag-theme-quartz-dark .ag-root-wrapper {
+  border: 1px solid rgb(64 64 64) !important; /* border-neutral-700 */
+}
+
+/* ============================================================================
+   HEADER STYLING - Match Preline Pro's sortable headers
+   ============================================================================ */
+
+.ag-preline-pro .ag-header {
+  background-color: transparent !important;
+  border-bottom: 1px solid #e7e5e4 !important;
+  border-top: 1px solid #e7e5e4 !important;
+}
+
+.ag-preline-pro.ag-theme-quartz-dark .ag-header {
+  border-bottom: 1px solid rgb(64 64 64) !important;
+  border-top: 1px solid rgb(64 64 64) !important;
+}
+
+/* Header cells - match Preline Pro's header styling */
+.ag-preline-pro .ag-header-cell {
+  background-color: transparent !important;
+  padding: 0 !important;
+  border-right: none !important;
+}
+
+/* Header cell content wrapper */
+.ag-preline-pro .ag-header-cell-comp-wrapper {
+  height: 100%;
+  padding: 10px 20px !important; /* py-2.5 px-5 */
+}
+
+/* Header label styling */
+.ag-preline-pro .ag-header-cell-label {
+  color: #78716c !important; /* text-stone-500 */
+  font-size: 0.875rem !important; /* text-sm */
+  font-weight: 400 !important; /* font-normal */
+  text-transform: none !important;
+  letter-spacing: normal !important;
+}
+
+.ag-preline-pro.ag-theme-quartz-dark .ag-header-cell-label {
+  color: rgb(163 163 163) !important; /* text-neutral-500 */
+}
+
+/* Sort icon - match Preline Pro's dropdown arrow */
+.ag-preline-pro .ag-sort-indicator-icon {
+  opacity: 1 !important;
+}
+
+.ag-preline-pro .ag-header-icon .ag-icon {
+  color: #78716c !important;
+  font-size: 14px !important;
+}
+
+.ag-preline-pro.ag-theme-quartz-dark .ag-header-icon .ag-icon {
+  color: rgb(163 163 163) !important;
+}
+
+/* Hide default sort indicators and show custom arrow */
+.ag-preline-pro .ag-sort-indicator-container {
+  gap: 0 !important;
+  margin-left: 4px !important;
+}
+
+/* ============================================================================
+   CHECKBOX STYLING - Match Preline Pro's checkboxes
+   ============================================================================ */
+
+.ag-preline-pro input[type="checkbox"] {
+  width: 1rem !important;
+  height: 1rem !important;
+  border-radius: 0.25rem !important; /* rounded-sm */
+  border: 1px solid #d6d3d1 !important; /* border-stone-300 */
+  background-color: white !important;
+  cursor: pointer;
+}
+
+.ag-preline-pro input[type="checkbox"]:checked {
+  background-color: #22c55e !important; /* green-600 */
+  border-color: #22c55e !important;
+}
+
+.ag-preline-pro.ag-theme-quartz-dark input[type="checkbox"] {
+  background-color: rgb(23 23 23) !important; /* bg-neutral-800 */
+  border-color: rgb(82 82 82) !important; /* border-neutral-600 */
+}
+
+.ag-preline-pro.ag-theme-quartz-dark input[type="checkbox"]:checked {
+  background-color: #10b981 !important; /* green-500 */
+  border-color: #10b981 !important;
+}
+
+/* ============================================================================
+   ROW STYLING - Match Preline Pro's table rows
+   ============================================================================ */
+
+.ag-preline-pro .ag-row {
+  background-color: white !important;
+  border-bottom: 1px solid #e7e5e4 !important; /* divide-stone-200 */
+}
+
+.ag-preline-pro.ag-theme-quartz-dark .ag-row {
+  background-color: transparent !important;
+  border-bottom: 1px solid rgb(64 64 64) !important; /* divide-neutral-700 */
+}
+
+/* Row hover effect */
+.ag-preline-pro .ag-row:hover {
+  background-color: #fafaf9 !important; /* bg-stone-50 */
+}
+
+.ag-preline-pro.ag-theme-quartz-dark .ag-row:hover {
+  background-color: rgb(38 38 38) !important; /* bg-neutral-800 */
+}
+
+/* Selected row */
+.ag-preline-pro .ag-row-selected {
+  background-color: #fafaf9 !important;
+}
+
+.ag-preline-pro.ag-theme-quartz-dark .ag-row-selected {
+  background-color: rgb(38 38 38) !important;
+}
+
+/* ============================================================================
+   CELL STYLING - Match Preline Pro's cell padding and text
+   ============================================================================ */
+
+.ag-preline-pro .ag-cell {
+  padding: 4px 16px !important; /* py-1 px-4 */
+  border-right: none !important;
+  line-height: 1.5 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* First checkbox cell */
+.ag-preline-pro .ag-cell[col-id="0"] {
+  padding: 16px 12px !important; /* py-4 px-3 */
+}
+
+/* Last action cell */
+.ag-preline-pro .ag-cell:last-child {
+  justify-content: flex-end !important;
+}
+
+/* ============================================================================
+   STATUS BADGES - Match exact Preline Pro styling
+   ============================================================================ */
+
+/* Ready for pickup / Fulfilled status badges */
+.ag-preline-pro .ag-cell-wrapper {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+/* ============================================================================
+   PAGINATION - Match Preline Pro's pagination style
+   ============================================================================ */
+
+.ag-preline-pro .ag-paging-panel {
+  display: none !important; /* Use custom pagination */
+}
+
+/* ============================================================================
+   REMOVE UNNECESSARY AG-GRID ELEMENTS
+   ============================================================================ */
+
+/* Remove focus outline */
+.ag-preline-pro .ag-cell-focus,
+.ag-preline-pro .ag-cell-focus:focus-within {
+  border: none !important;
+  outline: none !important;
+}
+
+/* Remove range selection */
+.ag-preline-pro .ag-cell-range-selected:not(.ag-cell-range-single-cell) {
+  background-color: transparent !important;
+}
+
+/* Remove column hover */
+.ag-preline-pro .ag-header-cell:hover {
+  background-color: transparent !important;
+}
+
+/* ============================================================================
+   SCROLLBAR STYLING - Match Preline Pro's custom scrollbar
+   ============================================================================ */
+
+.ag-preline-pro .ag-body-horizontal-scroll::-webkit-scrollbar,
+.ag-preline-pro .ag-body-vertical-scroll::-webkit-scrollbar {
+  height: 8px !important;
+  width: 8px !important;
+}
+
+.ag-preline-pro .ag-body-horizontal-scroll::-webkit-scrollbar-track,
+.ag-preline-pro .ag-body-vertical-scroll::-webkit-scrollbar-track {
+  background: #f5f5f4 !important; /* bg-stone-100 */
+  border-radius: 9999px !important;
+}
+
+.ag-preline-pro.ag-theme-quartz-dark .ag-body-horizontal-scroll::-webkit-scrollbar-track,
+.ag-preline-pro.ag-theme-quartz-dark .ag-body-vertical-scroll::-webkit-scrollbar-track {
+  background: rgb(64 64 64) !important; /* bg-neutral-700 */
+}
+
+.ag-preline-pro .ag-body-horizontal-scroll::-webkit-scrollbar-thumb,
+.ag-preline-pro .ag-body-vertical-scroll::-webkit-scrollbar-thumb {
+  background: #d6d3d1 !important; /* bg-stone-300 */
+  border-radius: 9999px !important;
+}
+
+.ag-preline-pro.ag-theme-quartz-dark .ag-body-horizontal-scroll::-webkit-scrollbar-thumb,
+.ag-preline-pro.ag-theme-quartz-dark .ag-body-vertical-scroll::-webkit-scrollbar-thumb {
+  background: rgb(115 115 115) !important; /* bg-neutral-500 */
+}
+
+/* ============================================================================
+   CUSTOM HEADER COMPONENT STYLES
+   ============================================================================ */
+
+/* Custom header for dropdown menu appearance */
+.ag-preline-pro .ag-header-cell-text {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  cursor: pointer !important;
+}
+
+.ag-preline-pro .ag-header-cell-text:hover {
+  color: #292524 !important; /* text-stone-800 */
+}
+
+.ag-preline-pro.ag-theme-quartz-dark .ag-header-cell-text:hover {
+  color: rgb(229 229 229) !important; /* text-neutral-300 */
+}
+
+/* ============================================================================
+   ANIMATIONS
+   ============================================================================ */
+
+.ag-preline-pro .ag-row {
+  transition: background-color 150ms ease !important;
+}
+
+.ag-preline-pro * {
+  transition: none !important; /* Disable other animations for performance */
+}
+
+.ag-preline-pro .ag-row,
+.ag-preline-pro .ag-row:hover {
+  transition: background-color 150ms ease !important;
+}
+
+/* ============================================================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  .ag-preline-pro .ag-cell {
+    padding: 2px 8px !important;
+    font-size: 0.75rem !important; /* text-xs on mobile */
+  }
+
+  .ag-preline-pro .ag-header-cell-comp-wrapper {
+    padding: 8px 8px !important;
+  }
+}
+
+/* ============================================================================
+   STATUS CELL SPECIFIC STYLES
+   ============================================================================ */
+
+/* Ensure status badges are properly aligned */
+.ag-preline-pro .ag-cell[col-id="status"] {
+  padding: 4px 16px !important;
+}
+
+/* Action buttons cell */
+.ag-preline-pro .ag-cell[col-id="actions"] {
+  padding: 4px 16px 4px 4px !important;
+}
+
+/* Order number link color */
+.ag-preline-pro a {
+  color: #16a34a !important; /* text-green-600 */
+  text-decoration: none !important;
+  font-weight: 500 !important;
+}
+
+.ag-preline-pro a:hover {
+  text-decoration: underline !important;
+  text-decoration-thickness: 2px !important;
+}
+
+.ag-preline-pro.ag-theme-quartz-dark a {
+  color: #4ade80 !important; /* text-green-400 */
+}
+
+.ag-preline-pro.ag-theme-quartz-dark a:hover {
+  color: #86efac !important; /* text-green-500 */
+}
