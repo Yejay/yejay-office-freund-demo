@@ -29,6 +29,69 @@ The app doesn't have formal tests, but you can test features by:
 3. Press `cmd+k` (Mac) or `ctrl+k` (Windows) to test the command palette
 4. Visit `/billing` to test subscription UI
 
+## Visual Development
+
+### Credentials to use during development
+
+- Use the following credentials to login with clerk, during development
+- email:jane+clerk_test@example.com
+- password: yejaydemirkan
+
+### Design Principles
+
+- Comprehensive design checklist in `/context/design-principles.md`
+- Brand style guide in `/context/style-guide.md`
+- When making visual (front-end, UI/UX) changes, always refer to these files for guidance
+
+### Quick Visual Check
+
+IMMEDIATELY after implementing any front-end change:
+
+1. **Identify what changed** - Review the modified components/pages
+2. **Navigate to affected pages** - Use `mcp_playwright_browser_navigate` to visit each changed view
+3. **Verify design compliance** - Compare against `/context/design-principles.md` and `/docs/STYLING.md`
+4. **Validate feature implementation** - Ensure the change fulfills the user's specific request
+5. **Check acceptance criteria** - Review any provided context files or requirements
+6. **Capture evidence** - Take full page screenshot at desktop viewport (1440px) of each changed view
+7. **Check for errors** - Run `mcp_playwright_browser_console_messages`
+
+This verification ensures changes meet design standards and user requirements.
+
+### Comprehensive Design Review
+
+Invoke the '@agent-design-review" subagent for thorough design validation when:
+
+- Completing significant UI/UX features
+- Before finalizing PRs with visual changes
+- Needing comprehensive accessibility and responsiveness testing
+
+### Key Features
+
+- Dashboard for event management
+- Content moderation tools
+- Export functionality
+- Credits system
+- Multi-tenant architecture with organization support
+
+## Git Commit Guidelines
+
+Please use Conventional Commits formatting for git commits.
+
+- Please use Conventional Branch naming (prefix-based branch naming convention)
+- Please do not mention yourself (Claude) as a co-author when committing, or include any links to Claude Code
+
+## Guidance Memories
+
+- Please ask for clarification upfront, upon the initial prompts, when you need more direction.
+
+## Linting and Code Quality
+
+- Please run "npm run lint' after completing large additions or refactors to ensure adherence to syntactic best practices.
+
+## CLI Tooling Memories
+
+- Please use the gh" CLI tool when appropriate, create issues, open pull requests, read comments, etc.
+
 ## Architecture Overview
 
 ### Multi-Tenant Data Isolation
@@ -53,6 +116,7 @@ export async function myAction() {
 ```
 
 **Why this matters**:
+
 - Clerk provides the current organization context via `auth().orgId`
 - Every database record MUST have `org_id` to ensure data isolation
 - RLS policies (though currently permissive) rely on application-layer filtering
@@ -61,16 +125,19 @@ export async function myAction() {
 ### Server Components + Client Components Pattern
 
 **Server Components** (no 'use client'):
+
 - Fetch data using server actions
 - Located in `app/*/page.tsx`
 - Pass data as props to client components
 
 **Client Components** ('use client'):
+
 - Handle interactivity (forms, modals, search, filtering)
 - Located in `components/`
 - Receive initial data as props, maintain local state
 
 Example:
+
 ```typescript
 // app/dashboard/page.tsx (Server Component)
 export default async function Dashboard() {
@@ -98,31 +165,37 @@ export function InvoiceTable({ initialInvoices }: Props) {
 ## Key Files & Their Purpose
 
 ### Authentication & Database
+
 - `middleware.ts` - Clerk authentication guard for protected routes
 - `lib/supabase/clerk-server.ts` - Bridge between Clerk (auth) and Supabase (data)
 - `app/actions/invoices.ts` - All invoice CRUD operations (server actions)
 
 ### Type Safety
+
 - `lib/types/invoice.ts` - TypeScript types for invoices
 - `lib/schemas/invoice.schema.ts` - Zod schemas for runtime validation
 - **Important**: Validate data using Zod before database operations:
+
   ```typescript
   const validation = validateCreateInvoice(input);
   if (!validation.success) return { error: validation.error };
   ```
 
 ### UI Components
+
 - `components/invoices/invoice-table-ag-grid.tsx` - AG Grid table (primary table UI)
 - `components/invoices/invoice-dialog.tsx` - Create/edit invoice modal
 - `components/command-palette.tsx` - Keyboard-driven command interface (cmd+k)
 - `components/preline-init.tsx` - Initializes Preline UI components
 
 ### Billing & Subscriptions
+
 - `lib/billing/subscription-limits.ts` - Plan definitions and usage limits
 - `app/billing/page.tsx` - Subscription management UI
 - **Note**: Clerk Billing is in Beta and requires manual dashboard setup
 
 ### Command System
+
 - `lib/commands/registry.ts` - Command palette command definitions
 - `lib/commands/types.ts` - TypeScript types for commands
 - Uses Fuse.js for fuzzy search
@@ -130,6 +203,7 @@ export function InvoiceTable({ initialInvoices }: Props) {
 ## Environment Variables
 
 Required variables (see `.env.example`):
+
 ```bash
 # Clerk (from dashboard.clerk.com)
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
@@ -147,12 +221,14 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=
 ## Database Schema
 
 The `invoices` table is defined in `supabase-schema.sql`:
+
 - Run this SQL in Supabase SQL Editor to set up the database
 - Includes mock data for `demo_org_1` (10 invoices) and `demo_org_2` (2 invoices)
 - Has indexes on `org_id`, `user_id`, `status`, and `invoice_number`
 - RLS is enabled but policies are permissive (application-layer filtering)
 
 Key columns:
+
 - `id` (UUID) - Primary key
 - `org_id` (TEXT) - Organization identifier from Clerk
 - `user_id` (TEXT) - User identifier from Clerk
@@ -197,6 +273,7 @@ export async function myAction(input: MyInput) {
 ### Adding a Command to Command Palette
 
 1. Define in `lib/commands/registry.ts`:
+
 ```typescript
 {
   id: 'my-command',
@@ -210,6 +287,7 @@ export async function myAction(input: MyInput) {
 ```
 
 2. Handle in `components/command-palette.tsx`:
+
 ```typescript
 case 'my-command':
   // Execute action
@@ -251,6 +329,7 @@ The app dynamically switches between `ag-theme-quartz` and `ag-theme-quartz-dark
 The app uses Preline's HTML + Tailwind patterns directly (no wrapper components):
 
 **Buttons:**
+
 ```tsx
 <button className="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
   Button Text
@@ -258,6 +337,7 @@ The app uses Preline's HTML + Tailwind patterns directly (no wrapper components)
 ```
 
 **Cards:**
+
 ```tsx
 <div className="bg-white border border-gray-200 rounded-xl shadow-sm dark:bg-neutral-800 dark:border-neutral-700">
   <div className="p-5 border-b border-gray-200 dark:border-neutral-700">
@@ -268,6 +348,7 @@ The app uses Preline's HTML + Tailwind patterns directly (no wrapper components)
 ```
 
 **Modals (HSOverlay):**
+
 ```tsx
 <div id="modal-id" className="hs-overlay hs-overlay-backdrop-open:backdrop-blur-sm hidden size-full fixed top-0 start-0 z-[80] overflow-x-hidden overflow-y-auto pointer-events-none">
   <div className="hs-overlay-open:opacity-100 hs-overlay-open:duration-500 transition-all sm:max-w-lg sm:w-full m-3 sm:mx-auto">
@@ -279,6 +360,7 @@ The app uses Preline's HTML + Tailwind patterns directly (no wrapper components)
 ```
 
 Control modals programmatically:
+
 ```tsx
 if (typeof window !== 'undefined' && window.HSOverlay) {
   window.HSOverlay.open('#modal-id');
@@ -292,23 +374,27 @@ See `components/command-palette.tsx` and `components/invoices/invoice-dialog.tsx
 ## Important Implementation Notes
 
 ### Clerk Organizations Setup
+
 1. Enable Organizations in Clerk Dashboard → Configure → Organizations
 2. Set "Who can create organizations" to "Anyone" for demo purposes
 3. Users can belong to multiple organizations
 4. Organization switcher is available in the UI via Clerk's `<OrganizationSwitcher />`
 
 ### Supabase Row Level Security
+
 - RLS is **enabled** on the `invoices` table
 - Current policies are **permissive** (allow all operations)
 - Security is enforced in the **application layer** by filtering on `org_id`
 - For production, tighten RLS policies to validate `org_id` against Clerk JWT claims
 
 ### Invoice Number Generation
+
 - Automatically generated in `app/actions/invoices.ts`
 - Format: `INV-XXX` (increments per organization)
 - Uses last invoice's number to calculate next
 
 ### AG Grid Features
+
 - Sortable columns (click headers)
 - Resizable columns (drag borders)
 - CSV export via `gridRef.current?.api.exportDataAsCsv()`
@@ -316,6 +402,7 @@ See `components/command-palette.tsx` and `components/invoices/invoice-dialog.tsx
 - Pagination (20 rows per page)
 
 ### Billing & Subscription Limits
+
 - **Free Plan**: 10 invoices/month
 - **Pro Plan**: 100 invoices/month
 - **Enterprise Plan**: Unlimited
@@ -325,6 +412,7 @@ See `components/command-palette.tsx` and `components/invoices/invoice-dialog.tsx
 ## Path Aliases
 
 The project uses `@/*` to reference root-level imports:
+
 ```typescript
 import { createClerkSupabaseClient } from '@/lib/supabase/clerk-server';
 import type { Invoice } from '@/lib/types/invoice';
