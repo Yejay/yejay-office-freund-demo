@@ -10,7 +10,7 @@ This is a **multi-tenant B2B SaaS invoice management application** demonstrating
 - **Next.js 15** with App Router, Server Components, and Server Actions
 - **TypeScript** with runtime validation via Zod
 - **AG Grid** for professional data tables
-- **Preline-inspired UI** with shadcn/ui components
+- **Preline UI** with direct HTML + Tailwind patterns (no wrapper components)
 
 ## Development Commands
 

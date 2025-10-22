@@ -60,7 +60,7 @@ export default function DashboardLayout({
         <div className="container mx-auto px-4 py-6 max-w-7xl">
           <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-between">
             <p className="text-center text-sm text-muted-foreground">
-              Built with Clerk, Supabase, Next.js & shadcn/ui
+              Built with Clerk, Supabase, Next.js & Preline
             </p>
             <p className="text-center text-sm text-muted-foreground">
               Press{' '}

@@ -67,7 +67,7 @@ export default function Home() {
                 <div className="text-3xl mb-3">🎨</div>
                 <h3 className="font-semibold mb-2">Modern UI</h3>
                 <p className="text-sm text-muted-foreground">
-                  shadcn/ui components with Tailwind CSS
+                  Preline UI with Tailwind CSS
                 </p>
               </div>
             </div>
