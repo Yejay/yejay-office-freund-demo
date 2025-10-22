@@ -327,16 +327,14 @@ See `components/command-palette.tsx` and `components/invoices/invoice-dialog.tsx
 The project uses `@/*` to reference root-level imports:
 ```typescript
 import { createClerkSupabaseClient } from '@/lib/supabase/clerk-server';
-import { Button } from '@/components/ui/button';
 import type { Invoice } from '@/lib/types/invoice';
 ```
 
-## Documentation References
+## Documentation
 
-For deeper technical understanding, see:
-- `ARCHITECTURE.md` - Comprehensive technical guide for new developers
-- `README.md` - Setup instructions and feature overview
-- `PRESENTATION.md` - Demo script for presenting the application
+- **[README.md](./README.md)** - Project overview, quick start, and setup
+- **[docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)** - Technical architecture guide (authentication, data flow, key patterns)
+- **[docs/STYLING.md](./docs/STYLING.md)** - UI styling guide (Preline integration, theming, dark mode)
 
 ## Common Gotchas
 
