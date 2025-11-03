@@ -1,10 +1,17 @@
-# AG Grid Styling Guide - Matching Corporate Brand
+# AG Grid Custom Theme - OfficeFreund
 
-## Our Approach
+This document explains the custom AG Grid theme implementation using AG Grid's **official Theming API** that matches Preline's aesthetic and OfficeFreund's corporate design.
 
-**Problem:** AG Grid uses CSS variables. Tailwind uses utility classes. How do we keep them visually consistent?
+## Overview
 
-**Solution:** Define brand colors once → Apply to both systems.
+We use AG Grid's **official Theming API** (introduced in AG Grid v32+) to create a custom theme based on the Quartz theme. The theme automatically switches between light and dark modes to match the application's theme system.
+
+**Why the Theming API?**
+- Modern, maintainable approach (no CSS conflicts)
+- Type-safe theme parameters
+- Automatic color calculations and consistency
+- Better performance
+- Official AG Grid recommendation
 
 ---
 
@@ -21,231 +28,336 @@ Font: Rethink Sans
 
 ---
 
-## Step 1: Apply to Tailwind (Preline Components)
+## Implementation
 
-**File:** `app/globals.css`
+### 1. Theme Definition: `lib/ag-grid-theme.ts`
 
-```css
-:root {
-  /* OfficeFreund brand colors */
-  --primary: 220 100% 61%;              /* #3a86ff */
-  --foreground: 0 0% 12%;               /* #1e1e1e */
-  --muted-foreground: 214 14% 61%;      /* #8d95a3 */
-}
+The custom theme is defined using AG Grid's `themeQuartz.withParams()` API:
 
-.dark {
-  /* Adjust for dark mode */
-  --primary: 220 100% 65%;              /* Lighter blue */
-  --foreground: 0 0% 98%;               /* Near-white */
-}
+```typescript
+import { themeQuartz } from 'ag-grid-community';
 
-body {
-  font-family: 'Rethink Sans', sans-serif;
-}
+// Light mode parameters
+const lightParams = {
+  accentColor: '#3a86ff',         // OfficeFreund blue
+  backgroundColor: '#ffffff',      // Pure white
+  foregroundColor: '#1e1e1e',     // Dark charcoal
+  borderRadius: 8,                // Match Preline
+  headerBackgroundColor: '#f9fafb',
+  headerFontWeight: 600,
+  fontFamily: 'Rethink Sans, sans-serif',
+  wrapperBorderRadius: 12,
+  // ... more parameters
+};
+
+// Dark mode parameters
+const darkParams = {
+  accentColor: '#60a5fa',         // Lighter blue for contrast
+  backgroundColor: '#1e1e1e',     // Dark charcoal
+  foregroundColor: '#f9fafb',     // Near-white
+  // ... matching structure to lightParams
+};
+
+// Export responsive theme
+export const officeFreundTheme = themeQuartz
+  .withParams(lightParams, 'light')
+  .withParams(darkParams, 'dark');
 ```
 
-**Result:** All Preline components (buttons, cards, badges) use brand colors.
-
-```jsx
-<button className="bg-primary text-primary-foreground">
-  // Automatically uses #3a86ff
-</button>
-```
+**Key Features:**
+- Based on AG Grid's Quartz theme
+- Two parameter sets (light/dark) for automatic theme switching
+- Uses OfficeFreund brand colors
+- Matches Preline's spacing and border radius
 
 ---
 
-## Step 2: Apply to AG Grid
-
-**File:** `app/ag-grid-officefreund-theme.css`
-
-### Light Mode
-
-```css
-.ag-theme-quartz {
-  /* Base colors */
-  --ag-background-color: hsl(0, 0%, 100%);        /* White */
-  --ag-foreground-color: hsl(0, 0%, 12%);         /* #1e1e1e */
-  --ag-border-color: hsl(214, 14%, 90%);          /* Light gray */
-
-  font-family: 'Rethink Sans', sans-serif !important;
-}
-
-/* Brand color for interactive elements */
-.ag-theme-quartz .ag-paging-button {
-  color: hsl(220, 100%, 61%) !important;          /* #3a86ff */
-}
-
-.ag-theme-quartz .ag-row-selected {
-  background-color: hsl(220, 100%, 97%) !important; /* Very light blue */
-  border-left: 3px solid hsl(220, 100%, 61%) !important; /* #3a86ff */
-}
-
-.ag-theme-quartz .ag-cell-focus {
-  border: 1px solid hsl(220, 100%, 61%) !important; /* #3a86ff */
-}
-```
-
-### Dark Mode
-
-```css
-.ag-theme-quartz-dark {
-  --ag-background-color: hsl(0, 0%, 12%);         /* #1e1e1e */
-  --ag-foreground-color: hsl(0, 0%, 98%);         /* White */
-
-  font-family: 'Rethink Sans', sans-serif !important;
-}
-
-.ag-theme-quartz-dark .ag-paging-button {
-  color: hsl(220, 100%, 65%) !important;          /* Lighter for dark mode */
-}
-```
-
----
-
-## Step 3: Connect AG Grid to Theme System
-
-**File:** `components/orders/order-table.tsx`
+### 2. Component Usage: `components/orders/order-table.tsx`
 
 ```tsx
+import { officeFreundTheme } from '@/lib/ag-grid-theme';
 import { useTheme } from 'next-themes';
 
 export function OrderTable({ orders }) {
   const { theme } = useTheme();
 
   return (
-    <div className={theme === 'dark' ? 'ag-theme-quartz-dark' : 'ag-theme-quartz'}>
-      <AgGridReact rowData={orders} ... />
+    <div
+      data-ag-theme-mode={theme === 'dark' ? 'dark' : 'light'}
+      style={{ height: 400, width: '100%' }}
+    >
+      <AgGridReact
+        ref={gridRef}
+        rowData={orders}
+        columnDefs={columnDefs}
+        theme={officeFreundTheme}
+        rowSelection={{
+          mode: 'multiRow',
+          checkboxes: true,
+          headerCheckbox: true,
+          enableClickSelection: false,
+        }}
+      />
     </div>
   );
 }
 ```
 
----
-
-## How It All Works Together
-
-### 1. Define Colors Once
-
-```
-#3a86ff → hsl(220, 100%, 61%)
-```
-
-### 2. Apply to Tailwind
-
-```css
-/* globals.css */
---primary: 220 100% 61%;  /* No hsl() wrapper */
-```
-
-### 3. Apply to AG Grid
-
-```css
-/* ag-grid-officefreund-theme.css */
-color: hsl(220, 100%, 61%);  /* With hsl() wrapper */
-```
-
-### 4. Both Systems Match
-
-- Preline button: Uses `bg-primary` → `#3a86ff`
-- AG Grid pagination: Uses `hsl(220, 100%, 61%)` → `#3a86ff`
-- **Result:** Visually identical across entire app
+**Important:**
+- ❌ DO NOT import `ag-grid.css` (causes conflicts)
+- ✅ Use `data-ag-theme-mode` attribute for theme switching
+- ✅ Pass theme object to `theme` prop
+- ✅ Use modern `rowSelection` object syntax
 
 ---
 
-## Customizing for Your Brand
+## Theme Parameters Reference
 
-### Update Colors (10 minutes)
+### Colors
 
-**Step 1:** Define your brand colors in Hex
+| Parameter | Light Mode | Dark Mode | Purpose |
+|-----------|------------|-----------|---------|
+| `accentColor` | #3a86ff | #60a5fa | Selections, focus, brand color |
+| `backgroundColor` | #ffffff | #1e1e1e | Page background |
+| `foregroundColor` | #1e1e1e | #f9fafb | Primary text |
+| `headerBackgroundColor` | #f9fafb | #111111 | Column headers |
+| `borderColor` | #e5e7eb | #374151 | Cell borders |
+| `checkboxCheckedBackgroundColor` | #3a86ff | #60a5fa | Checked checkboxes |
 
-```
-Your Primary:   #FF5733
-Your Dark:      #2C3E50
-Your Gray:      #95A5A6
-```
+### Typography
 
-**Step 2:** Convert to HSL
+- `fontFamily`: 'Rethink Sans, sans-serif'
+- `fontSize`: 14
+- `headerFontSize`: 14
+- `headerFontWeight`: 600
 
-Use: https://www.rapidtables.com/convert/color/hex-to-hsl.html
+### Spacing & Layout
 
-```
-#FF5733 → hsl(9, 100%, 60%)
-#2C3E50 → hsl(210, 29%, 24%)
-#95A5A6 → hsl(184, 9%, 62%)
-```
-
-**Step 3:** Update `globals.css`
-
-```css
-:root {
-  --primary: 9 100% 60%;
-  --foreground: 210 29% 24%;
-  --muted-foreground: 184 9% 62%;
-}
-```
-
-**Step 4:** Update `ag-grid-officefreund-theme.css`
-
-Find and replace:
-- `hsl(220, 100%, 61%)` → `hsl(9, 100%, 60%)`
-- `hsl(0, 0%, 12%)` → `hsl(210, 29%, 24%)`
-- `hsl(214, 14%, 61%)` → `hsl(184, 9%, 62%)`
-
-**Done!** Both systems now use your brand colors.
+- `spacing`: 8
+- `gridSize`: 8
+- `cellHorizontalPaddingScale`: 1.2
+- `borderRadius`: 8
+- `wrapperBorderRadius`: 12
 
 ---
 
-## Key Differences
+## How Dark Mode Works
 
-| System | Format | Example |
-|--------|--------|---------|
-| **Tailwind** | `H S% L%` (no wrapper) | `--primary: 220 100% 61%` |
-| **AG Grid** | `hsl(H, S%, L%)` (with wrapper) | `color: hsl(220, 100%, 61%)` |
+1. **Theme System**: `next-themes` provides current theme via `useTheme()`
+2. **Mode Attribute**: `data-ag-theme-mode` tells AG Grid which parameter set to use
+3. **Automatic Switching**: AG Grid applies dark params when `mode="dark"`
 
-**Why?** Tailwind's CSS variable system expects space-separated values. AG Grid expects standard CSS `hsl()` format.
-
----
-
-## Verifying Consistency
-
-### Check Preline Components
-```jsx
-<button className="bg-primary">
-  Button
-</button>
+```tsx
+// User clicks theme toggle
+// → next-themes updates theme state
+// → useTheme() returns 'dark'
+// → data-ag-theme-mode="dark" updates
+// → AG Grid switches to darkParams
 ```
-→ Should be `#3a86ff`
 
-### Check AG Grid
-```css
-.ag-theme-quartz .ag-paging-button {
-  color: hsl(220, 100%, 61%);
-}
+---
+
+## Customizing the Theme
+
+### Update Brand Colors
+
+Edit `lib/ag-grid-theme.ts`:
+
+```typescript
+const lightParams = {
+  accentColor: '#YOUR_PRIMARY_COLOR',
+  backgroundColor: '#YOUR_BACKGROUND',
+  foregroundColor: '#YOUR_TEXT_COLOR',
+  // ...
+};
 ```
-→ Should also be `#3a86ff`
 
-### Browser DevTools
-1. Inspect Preline button → Check computed color
-2. Inspect AG Grid pagination → Check computed color
-3. Both should show same RGB value: `rgb(58, 134, 255)`
+### Adjust Spacing
+
+```typescript
+const lightParams = {
+  spacing: 12,                    // Increase padding
+  cellHorizontalPaddingScale: 1.5, // More horizontal space
+  gridSize: 10,                   // Larger grid cells
+};
+```
+
+### Change Typography
+
+```typescript
+const lightParams = {
+  fontFamily: 'Inter, sans-serif',
+  fontSize: 16,
+  headerFontWeight: 700,  // Bolder headers
+};
+```
+
+### Available Parameters
+
+See AG Grid documentation:
+- [All Parameters](https://www.ag-grid.com/react-data-grid/theming-parameters/)
+- [Color Schemes](https://www.ag-grid.com/react-data-grid/theming-colors/)
+- [Theme Builder](https://www.ag-grid.com/theme-builder/)
 
 ---
 
-## Files to Edit
+## Matching Preline Aesthetic
 
-When changing brand colors:
+The theme achieves visual consistency with Preline through:
 
-1. `app/globals.css` (Tailwind/Preline)
-2. `app/ag-grid-officefreund-theme.css` (AG Grid)
-
-That's it! Everything else updates automatically.
+| Element | Preline | AG Grid Theme |
+|---------|---------|---------------|
+| Border Radius | 8px | `borderRadius: 8` |
+| Container Radius | 12px | `wrapperBorderRadius: 12` |
+| Header Background | `bg-gray-50` | `headerBackgroundColor: '#f9fafb'` |
+| Accent Color | `bg-primary` (#3a86ff) | `accentColor: '#3a86ff'` |
+| Font | Rethink Sans | `fontFamily: 'Rethink Sans'` |
+| Border Color | `border-gray-200` | `borderColor: '#e5e7eb'` |
 
 ---
 
-## Result
+## Migration from Legacy CSS
 
-✅ Single brand color definition
-✅ Applied to both Tailwind and AG Grid
-✅ Entire app looks cohesive
-✅ Easy to update (2 files)
-✅ Dark mode works in both systems
+### Before (Old Approach)
+
+```tsx
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-quartz.css';
+import '@/app/ag-grid-officefreund-theme.css';
+
+<div className="ag-theme-quartz">
+  <AgGridReact theme="legacy" />
+</div>
+```
+
+### After (New Theming API)
+
+```tsx
+import { officeFreundTheme } from '@/lib/ag-grid-theme';
+
+<div data-ag-theme-mode={theme}>
+  <AgGridReact theme={officeFreundTheme} />
+</div>
+```
+
+**Benefits:**
+- ✅ No CSS conflicts
+- ✅ Type-safe parameters
+- ✅ Automatic dark mode
+- ✅ Better performance
+- ✅ Future-proof (AG Grid's recommended approach)
+
+---
+
+## Troubleshooting
+
+### Error: "Theming API and Legacy Themes are both used"
+
+**Cause:** You're importing both `ag-grid.css` and using the new API.
+
+**Fix:** Remove this line:
+```tsx
+import 'ag-grid-community/styles/ag-grid.css'; // ❌ Remove
+```
+
+### Dark Mode Not Switching
+
+**Check:**
+1. `data-ag-theme-mode` attribute is set
+2. `useTheme()` returns correct value
+3. Both `lightParams` and `darkParams` are defined
+
+### Colors Don't Match Brand
+
+1. Verify colors in `lib/ag-grid-theme.ts`
+2. Check `docs/CORPORATE-DESIGN.md` for correct values
+3. Use browser DevTools to inspect computed colors
+
+### Deprecated Warnings
+
+If you see warnings about `rowSelection="multiple"`:
+
+**Old:**
+```tsx
+rowSelection="multiple"
+suppressRowClickSelection={true}
+```
+
+**New:**
+```tsx
+rowSelection={{
+  mode: 'multiRow',
+  enableClickSelection: false,
+}}
+```
+
+---
+
+## Files Overview
+
+### Core Files
+
+| File | Purpose |
+|------|---------|
+| `lib/ag-grid-theme.ts` | Theme definition with parameters |
+| `components/orders/order-table.tsx` | AG Grid component using theme |
+| `docs/CORPORATE-DESIGN.md` | Brand color reference |
+
+### No Longer Needed
+
+| File | Reason |
+|------|--------|
+| `app/ag-grid-officefreund-theme.css` | Replaced by Theming API |
+| `ag-grid.css` import | Not needed with new API |
+
+---
+
+## Testing
+
+### Verify Light Mode
+
+1. Open `/dashboard`
+2. Set theme to light
+3. Check:
+   - White background
+   - Dark text
+   - Blue accent color (#3a86ff)
+   - Light gray headers
+
+### Verify Dark Mode
+
+1. Click theme toggle
+2. Check:
+   - Dark charcoal background (#1e1e1e)
+   - Light text
+   - Lighter blue accent (#60a5fa)
+   - Darker headers
+
+### Verify No Console Errors
+
+Open DevTools console - should be clean with:
+- ✅ No "Theming API" errors
+- ✅ No deprecated warnings
+- ✅ No CSS conflicts
+
+---
+
+## Resources
+
+- [AG Grid Theming Documentation](https://www.ag-grid.com/react-data-grid/themes/)
+- [AG Grid Theming API](https://www.ag-grid.com/react-data-grid/theming/)
+- [AG Grid Theme Builder](https://www.ag-grid.com/theme-builder/)
+- [OfficeFreund Corporate Design](./CORPORATE-DESIGN.md)
+- [Preline UI](https://preline.co/)
+
+---
+
+## Summary
+
+✅ Modern Theming API (recommended by AG Grid)
+✅ Matches OfficeFreund brand colors
+✅ Consistent with Preline aesthetic
+✅ Automatic light/dark mode
+✅ Type-safe and maintainable
+✅ No CSS conflicts
+✅ Clean console (no errors)

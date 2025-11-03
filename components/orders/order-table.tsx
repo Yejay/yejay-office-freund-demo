@@ -13,12 +13,8 @@ import { Order, OrderStatus, PaymentStatus } from '@/lib/types/order';
 import { MoreHorizontal } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
-// Import AG Grid styles
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-quartz.css';
-
-// Import OfficeFreund-themed AG Grid styling
-import '@/app/ag-grid-officefreund-theme.css';
+// Import OfficeFreund custom theme (new theming API - no ag-grid.css needed)
+import { officeFreundTheme } from '@/lib/ag-grid-theme';
 
 // Register AG Grid modules
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -139,8 +135,6 @@ export function OrderTable({ orders }: OrderTableProps) {
   const columnDefs = useMemo<ColDef[]>(
     () => [
       {
-        headerCheckboxSelection: true,
-        checkboxSelection: true,
         width: 50,
         pinned: 'left',
         sortable: false,
@@ -220,7 +214,7 @@ export function OrderTable({ orders }: OrderTableProps) {
 
   return (
     <div
-      className={theme === 'dark' ? 'ag-theme-quartz-dark' : 'ag-theme-quartz'}
+      data-ag-theme-mode={theme === 'dark' ? 'dark' : 'light'}
       style={{ height: 400, width: '100%' }}
       suppressHydrationWarning
     >
@@ -229,10 +223,14 @@ export function OrderTable({ orders }: OrderTableProps) {
         rowData={orders}
         columnDefs={columnDefs}
         defaultColDef={defaultColDef}
-        rowSelection="multiple"
-        suppressRowClickSelection={true}
+        rowSelection={{
+          mode: 'multiRow',
+          checkboxes: true,
+          headerCheckbox: true,
+          enableClickSelection: false,
+        }}
         animateRows={true}
-        theme="legacy"
+        theme={officeFreundTheme}
       />
     </div>
   );
