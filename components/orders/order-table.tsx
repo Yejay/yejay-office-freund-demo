@@ -135,15 +135,10 @@ export function OrderTable({ orders }: OrderTableProps) {
   const columnDefs = useMemo<ColDef[]>(
     () => [
       {
-        width: 50,
-        pinned: 'left',
-        sortable: false,
-        filter: false,
-      },
-      {
         field: 'order_number',
         headerName: 'Order',
-        width: 120,
+        flex: 0.8,          // Flexible width
+        minWidth: 120,
         sortable: true,
         filter: true,
         cellRenderer: OrderNumberRenderer,
@@ -151,14 +146,16 @@ export function OrderTable({ orders }: OrderTableProps) {
       {
         field: 'purchased',
         headerName: 'Purchased',
-        width: 220,
+        flex: 1.5,          // Wider for date/time
+        minWidth: 200,
         sortable: true,
         filter: true,
       },
       {
         field: 'status',
         headerName: 'Status',
-        width: 180,
+        flex: 1,
+        minWidth: 140,
         sortable: true,
         filter: true,
         cellRenderer: StatusRenderer,
@@ -166,21 +163,24 @@ export function OrderTable({ orders }: OrderTableProps) {
       {
         field: 'customer',
         headerName: 'Customer',
-        width: 180,
+        flex: 1.2,
+        minWidth: 150,
         sortable: true,
         filter: true,
       },
       {
         field: 'payment_method',
         headerName: 'Payment method',
-        width: 180,
+        flex: 1.2,
+        minWidth: 160,
         sortable: true,
         cellRenderer: PaymentMethodRenderer,
       },
       {
         field: 'payment_status',
         headerName: 'Payment status',
-        width: 180,
+        flex: 1,
+        minWidth: 140,
         sortable: true,
         filter: true,
         cellRenderer: PaymentStatusRenderer,
@@ -188,14 +188,15 @@ export function OrderTable({ orders }: OrderTableProps) {
       {
         field: 'items',
         headerName: 'Items',
-        width: 100,
+        flex: 0.5,
+        minWidth: 80,
         sortable: true,
         filter: 'agNumberColumnFilter',
         type: 'rightAligned',
       },
       {
         headerName: '',
-        width: 70,
+        width: 60,
         cellRenderer: ActionsRenderer,
         sortable: false,
         filter: false,
@@ -223,6 +224,8 @@ export function OrderTable({ orders }: OrderTableProps) {
         rowData={orders}
         columnDefs={columnDefs}
         defaultColDef={defaultColDef}
+        rowHeight={56}      // Preline-style taller rows for better readability
+        headerHeight={48}   // Slightly shorter headers
         rowSelection={{
           mode: 'multiRow',
           checkboxes: true,
