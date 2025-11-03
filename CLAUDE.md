@@ -9,7 +9,7 @@ This is a **multi-tenant B2B SaaS invoice management application** demonstrating
 - **Supabase** with Row Level Security (RLS) for data isolation
 - **Next.js 15** with App Router, Server Components, and Server Actions
 - **TypeScript** with runtime validation via Zod
-- **AG Grid** for professional data tables
+- **AG Grid** for professional data tables with custome theme to match corporate design and match preline aesthetic
 - **Preline UI** with direct HTML + Tailwind patterns (no wrapper components)
 
 ## Development Commands
@@ -40,7 +40,7 @@ The app doesn't have formal tests, but you can test features by:
 ### Design Principles
 
 - Comprehensive design checklist in `/context/design-principles.md`
-- Brand style guide in `/context/style-guide.md`
+- Brand style guide in `/docs/CORPORATE-DESIGN.md`
 - When making visual (front-end, UI/UX) changes, always refer to these files for guidance
 
 ### Quick Visual Check
@@ -48,12 +48,11 @@ The app doesn't have formal tests, but you can test features by:
 IMMEDIATELY after implementing any front-end change:
 
 1. **Identify what changed** - Review the modified components/pages
-2. **Navigate to affected pages** - Use `mcp_playwright_browser_navigate` to visit each changed view
+2. **Navigate to affected pages** - Use chrome-devtools-mcp to visit each changed view
 3. **Verify design compliance** - Compare against `/context/design-principles.md` and `/docs/STYLING.md`
 4. **Validate feature implementation** - Ensure the change fulfills the user's specific request
 5. **Check acceptance criteria** - Review any provided context files or requirements
 6. **Capture evidence** - Take full page screenshot at desktop viewport (1440px) of each changed view
-7. **Check for errors** - Run `mcp_playwright_browser_console_messages`
 
 This verification ensures changes meet design standards and user requirements.
 
