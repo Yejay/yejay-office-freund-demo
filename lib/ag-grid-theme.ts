@@ -114,8 +114,8 @@ const darkParams = {
   rangeSelectionBackgroundColor: '#1e40af', // Blue-800
 
   // Cell styling - Preline-like spacing
-  cellHorizontalPaddingScale: 1.2,
-  cellVerticalPaddingScale: 1.4,
+  cellHorizontalPaddingScale: 1.2,  // Balanced horizontal spacing
+  cellVerticalPaddingScale: 1.4,    // More vertical breathing room
   fontSize: 14,
   fontFamily: 'Rethink Sans, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
 

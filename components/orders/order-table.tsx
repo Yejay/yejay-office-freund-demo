@@ -137,7 +137,7 @@ export function OrderTable({ orders }: OrderTableProps) {
       {
         field: 'order_number',
         headerName: 'Order',
-        flex: 0.8,          // Flexible width
+        flex: 0.7,          // Slightly reduced for more columns
         minWidth: 120,
         sortable: true,
         filter: true,
@@ -146,7 +146,7 @@ export function OrderTable({ orders }: OrderTableProps) {
       {
         field: 'purchased',
         headerName: 'Purchased',
-        flex: 1.5,          // Wider for date/time
+        flex: 1.3,          // Slightly reduced for more columns
         minWidth: 200,
         sortable: true,
         filter: true,
@@ -154,7 +154,7 @@ export function OrderTable({ orders }: OrderTableProps) {
       {
         field: 'status',
         headerName: 'Status',
-        flex: 1,
+        flex: 0.9,          // Slightly reduced for more columns
         minWidth: 140,
         sortable: true,
         filter: true,
@@ -163,7 +163,7 @@ export function OrderTable({ orders }: OrderTableProps) {
       {
         field: 'customer',
         headerName: 'Customer',
-        flex: 1.2,
+        flex: 1.0,          // Slightly reduced for more columns
         minWidth: 150,
         sortable: true,
         filter: true,
@@ -171,7 +171,7 @@ export function OrderTable({ orders }: OrderTableProps) {
       {
         field: 'payment_method',
         headerName: 'Payment method',
-        flex: 1.2,
+        flex: 1.0,          // Slightly reduced for more columns
         minWidth: 160,
         sortable: true,
         cellRenderer: PaymentMethodRenderer,
@@ -179,7 +179,7 @@ export function OrderTable({ orders }: OrderTableProps) {
       {
         field: 'payment_status',
         headerName: 'Payment status',
-        flex: 1,
+        flex: 0.9,          // Slightly reduced for more columns
         minWidth: 140,
         sortable: true,
         filter: true,
@@ -196,7 +196,7 @@ export function OrderTable({ orders }: OrderTableProps) {
       },
       {
         headerName: '',
-        width: 60,
+        width: 48,          // Reduced from 60px for more compact three-dot menu
         cellRenderer: ActionsRenderer,
         sortable: false,
         filter: false,
@@ -216,7 +216,7 @@ export function OrderTable({ orders }: OrderTableProps) {
   return (
     <div
       data-ag-theme-mode={theme === 'dark' ? 'dark' : 'light'}
-      style={{ height: 400, width: '100%' }}
+      style={{ width: '100%' }}
       suppressHydrationWarning
     >
       <AgGridReact
@@ -234,6 +234,11 @@ export function OrderTable({ orders }: OrderTableProps) {
         }}
         animateRows={true}
         theme={officeFreundTheme}
+        // Pagination settings
+        pagination={true}
+        paginationPageSize={12}
+        paginationPageSizeSelector={[10, 20, 50]}
+        domLayout="autoHeight"
       />
     </div>
   );
