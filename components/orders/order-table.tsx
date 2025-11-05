@@ -10,7 +10,6 @@ import { AgGridReact } from 'ag-grid-react';
 import { ColDef, ModuleRegistry } from 'ag-grid-community';
 import { AllCommunityModule } from 'ag-grid-community';
 import { Order, OrderStatus, PaymentStatus } from '@/lib/types/order';
-import { MoreHorizontal } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
 // Import OfficeFreund custom theme (new theming API - no ag-grid.css needed)
@@ -117,20 +116,6 @@ export function OrderTable({ orders }: OrderTableProps) {
     );
   };
 
-  // Actions menu renderer
-  const ActionsRenderer = () => {
-    return (
-      <div className="hs-dropdown relative inline-flex">
-        <button
-          type="button"
-          className="hs-dropdown-toggle py-2 px-2 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent text-gray-500 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
-        >
-          <MoreHorizontal className="h-4 w-4" />
-        </button>
-      </div>
-    );
-  };
-
   // Column definitions
   const columnDefs = useMemo<ColDef[]>(
     () => [
@@ -194,14 +179,6 @@ export function OrderTable({ orders }: OrderTableProps) {
         filter: 'agNumberColumnFilter',
         type: 'rightAligned',
       },
-      {
-        headerName: '',
-        width: 48,          // Reduced from 60px for more compact three-dot menu
-        cellRenderer: ActionsRenderer,
-        sortable: false,
-        filter: false,
-        pinned: 'right',
-      },
     ],
     []
   );
@@ -211,6 +188,8 @@ export function OrderTable({ orders }: OrderTableProps) {
     resizable: true,
     sortable: true,
     filter: true,
+    suppressHeaderFilterButton: true,  // Hide filter icons, keep sort functionality
+    suppressHeaderMenuButton: true,    // Hide menu button for cleaner headers
   }), []);
 
   return (

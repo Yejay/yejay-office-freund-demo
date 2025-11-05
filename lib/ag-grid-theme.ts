@@ -55,7 +55,7 @@ const lightParams = {
   // Cell styling - Preline-like spacing
   cellHorizontalPaddingScale: 1.2,  // Balanced horizontal spacing
   cellVerticalPaddingScale: 1.4,    // More vertical breathing room
-  fontSize: 14,
+  fontSize: 13,
   fontFamily: 'Rethink Sans, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
 
   // Spacing
@@ -116,7 +116,7 @@ const darkParams = {
   // Cell styling - Preline-like spacing
   cellHorizontalPaddingScale: 1.2,  // Balanced horizontal spacing
   cellVerticalPaddingScale: 1.4,    // More vertical breathing room
-  fontSize: 14,
+  fontSize: 13,
   fontFamily: 'Rethink Sans, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
 
   // Spacing
